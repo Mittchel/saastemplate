@@ -31,8 +31,8 @@ namespace Saas.Api.Tests.Features
                 "MVP-01",
                 "RB-ACCESS-01"};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "No role or permissions without a real membership row", "  The token and GET /me grant a role and permissions only from a real membership " +
-                "row.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "No role or permissions without a real membership row", "  Roles and permissions are only ever reported from a real membership row in the " +
+                "active organisation.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "OperatorWithoutRole.acceptance.feature"
 #line hidden
@@ -110,7 +110,7 @@ namespace Saas.Api.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/OperatorWithoutRole.acceptance.feature.ndjson", 10);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/OperatorWithoutRole.acceptance.feature.ndjson", 9);
         }
         
         [global::NUnit.Framework.TestAttribute()]
@@ -136,35 +136,46 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 6
-    await testRunner.GivenAsync("dia123 the operator is signed in and a foreign workspace exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("an operatorless workspace of somebody else exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 7
-    await testRunner.WhenAsync("dia123 the operator enters the foreign workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.AndAsync("the operatorless development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 8
-    await testRunner.ThenAsync("dia123 entering succeeded", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.WhenAsync("the operatorless operator enters that workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 9
-    await testRunner.AndAsync("dia123 the token has no org_role claim and no permission claims", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("the operatorless entering succeeded", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 10
-    await testRunner.AndAsync("dia123 the token still carries the entered org_id and the platform-admin claim", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the operatorless token has no \"org_role\" claim", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 11
+    await testRunner.AndAsync("the operatorless token has no \"permission\" claim", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 12
+    await testRunner.AndAsync("the operatorless token claim \"is_platform_admin\" is \"true\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 13
+    await testRunner.AndAsync("the operatorless token claim \"org_id\" is the entered workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criteria 3 and 10 - GET /me after entering has null role and empty permissions")]
-        public async global::System.Threading.Tasks.Task Criteria3And10_GETMeAfterEnteringHasNullRoleAndEmptyPermissions()
+        [global::NUnit.Framework.DescriptionAttribute("criteria 3 and 10 and 11 - after entering, GET /me reports no role and no permiss" +
+            "ions (API side only for the frontend type)")]
+        public async global::System.Threading.Tasks.Task Criteria3And10And11_AfterEnteringGETMeReportsNoRoleAndNoPermissionsAPISideOnlyForTheFrontendType()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "1";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criteria 3 and 10 - GET /me after entering has null role and empty permissions", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criteria 3 and 10 and 11 - after entering, GET /me reports no role and no permiss" +
+                    "ions (API side only for the frontend type)", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 12
+#line 15
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -174,41 +185,47 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 13
-    await testRunner.GivenAsync("dia123 the operator is signed in and a foreign workspace exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 14
-    await testRunner.WhenAsync("dia123 the operator enters the foreign workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 15
-    await testRunner.AndAsync("dia123 the operator requests the current user", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
 #line 16
-    await testRunner.ThenAsync("dia123 the current user answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.GivenAsync("an operatorless workspace of somebody else exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 17
-    await testRunner.AndAsync("dia123 the current user has a null organizationRole and empty permissions", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the operatorless development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 18
-    await testRunner.AndAsync("dia123 the current user organization is the foreign workspace with a null role", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("the operatorless operator enters that workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 19
+    await testRunner.AndAsync("the operatorless caller requests the current user", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 20
+    await testRunner.ThenAsync("the operatorless answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 21
+    await testRunner.AndAsync("the operatorless current user has a null organizationRole", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 22
+    await testRunner.AndAsync("the operatorless current user has an empty permissions list", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 23
+    await testRunner.AndAsync("the operatorless current organization is the entered workspace with a null role", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 4 - the organizations list holds real memberships plus the entered one " +
-            "with null role")]
-        public async global::System.Threading.Tasks.Task Criterion4_TheOrganizationsListHoldsRealMembershipsPlusTheEnteredOneWithNullRole()
+        [global::NUnit.Framework.DescriptionAttribute("criteria 4 and 10 - after entering, the organizations list keeps real memberships" +
+            " and adds the entered one with a null role")]
+        public async global::System.Threading.Tasks.Task Criteria4And10_AfterEnteringTheOrganizationsListKeepsRealMembershipsAndAddsTheEnteredOneWithANullRole()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 4 - the organizations list holds real memberships plus the entered one " +
-                    "with null role", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criteria 4 and 10 - after entering, the organizations list keeps real memberships" +
+                    " and adds the entered one with a null role", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 20
+#line 25
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -218,34 +235,42 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 21
-    await testRunner.GivenAsync("dia123 the operator is signed in and a foreign workspace exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 26
+    await testRunner.GivenAsync("an operatorless workspace of somebody else exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 22
-    await testRunner.WhenAsync("dia123 the operator enters the foreign workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 27
+    await testRunner.AndAsync("the operatorless development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 23
-    await testRunner.AndAsync("dia123 the operator requests the current user", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 28
+    await testRunner.WhenAsync("the operatorless operator enters that workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 24
-    await testRunner.ThenAsync("dia123 the organizations list has the home workspace with a role and the foreign " +
-                        "workspace with a null role", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 29
+    await testRunner.AndAsync("the operatorless caller requests the current user", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 30
+    await testRunner.ThenAsync("the operatorless answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 31
+    await testRunner.AndAsync("the operatorless organizations keep the real memberships with their roles", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 32
+    await testRunner.AndAsync("the operatorless organizations list the entered workspace with a null role", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 5 - the operator gets 403 from runs in the entered workspace")]
-        public async global::System.Threading.Tasks.Task Criterion5_TheOperatorGets403FromRunsInTheEnteredWorkspace()
+        [global::NUnit.Framework.DescriptionAttribute("criteria 5 and 12 - after entering, GET /runs is refused")]
+        public async global::System.Threading.Tasks.Task Criteria5And12_AfterEnteringGETRunsIsRefused()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 5 - the operator gets 403 from runs in the entered workspace", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criteria 5 and 12 - after entering, GET /runs is refused", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 26
+#line 34
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -255,35 +280,38 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 27
-    await testRunner.GivenAsync("dia123 the operator is signed in and a foreign workspace exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 35
+    await testRunner.GivenAsync("an operatorless workspace of somebody else exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 28
-    await testRunner.WhenAsync("dia123 the operator enters the foreign workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 36
+    await testRunner.AndAsync("the operatorless development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 29
-    await testRunner.AndAsync("dia123 the operator requests the runs list", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 37
+    await testRunner.WhenAsync("the operatorless operator enters that workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 30
-    await testRunner.ThenAsync("dia123 the runs answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 38
+    await testRunner.AndAsync("the operatorless caller requests the runs list", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 39
+    await testRunner.ThenAsync("the operatorless answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 6 - the development user keeps its role and permissions in its own orga" +
-            "nization")]
-        public async global::System.Threading.Tasks.Task Criterion6_TheDevelopmentUserKeepsItsRoleAndPermissionsInItsOwnOrganization()
+        [global::NUnit.Framework.DescriptionAttribute("criteria 6 and 9 - the development user in its own organisation keeps role and pe" +
+            "rmissions")]
+        public async global::System.Threading.Tasks.Task Criteria6And9_TheDevelopmentUserInItsOwnOrganisationKeepsRoleAndPermissions()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "4";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 6 - the development user keeps its role and permissions in its own orga" +
-                    "nization", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criteria 6 and 9 - the development user in its own organisation keeps role and pe" +
+                    "rmissions", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 32
+#line 41
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -293,11 +321,26 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 33
-    await testRunner.GivenAsync("dia123 the operator is signed in and a foreign workspace exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 42
+    await testRunner.GivenAsync("the operatorless development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 34
-    await testRunner.ThenAsync("dia123 the token has an org_role claim and the permission organization.read", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 43
+    await testRunner.ThenAsync("the operatorless token has a non-empty \"org_role\" claim", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 44
+    await testRunner.AndAsync("the operatorless token permission claims include \"organization.read\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 45
+    await testRunner.WhenAsync("the operatorless caller requests the current user", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 46
+    await testRunner.ThenAsync("the operatorless answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 47
+    await testRunner.AndAsync("the operatorless current user role matches the token\'s role claim", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 48
+    await testRunner.AndAsync("the operatorless current user permissions include \"organization.read\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -313,7 +356,7 @@ namespace Saas.Api.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 7 - an ordinary account cannot enter a workspace it is not a member of", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 36
+#line 50
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -323,30 +366,32 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 37
-    await testRunner.GivenAsync("dia123 an ordinary account is signed in and the operator\'s workspace is known", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 51
+    await testRunner.GivenAsync("the operatorless development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 38
-    await testRunner.WhenAsync("dia123 the ordinary account enters the operator\'s workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 52
+    await testRunner.WhenAsync("an operatorless ordinary account tries to enter the development workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 39
-    await testRunner.ThenAsync("dia123 entering was refused", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 53
+    await testRunner.ThenAsync("the operatorless entering was refused", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 8 - a non-operator without a membership row gets 403 from GET /me")]
-        public async global::System.Threading.Tasks.Task Criterion8_ANon_OperatorWithoutAMembershipRowGets403FromGETMe()
+        [global::NUnit.Framework.DescriptionAttribute("criteria 8 and 9 - a non-operator without a membership row is refused on GET /me," +
+            " with a row it gets its role")]
+        public async global::System.Threading.Tasks.Task Criteria8And9_ANon_OperatorWithoutAMembershipRowIsRefusedOnGETMeWithARowItGetsItsRole()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "6";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 8 - a non-operator without a membership row gets 403 from GET /me", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criteria 8 and 9 - a non-operator without a membership row is refused on GET /me," +
+                    " with a row it gets its role", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 41
+#line 55
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -356,55 +401,30 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 42
-    await testRunner.GivenAsync("dia123 the member holds a membership in the development organization and is switc" +
-                        "hed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 56
+    await testRunner.GivenAsync("an operatorless ordinary account holds a Member membership in the development wor" +
+                        "kspace and is switched in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 43
-    await testRunner.WhenAsync("dia123 the member\'s membership is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 57
+    await testRunner.WhenAsync("the operatorless caller requests the current user", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 44
-    await testRunner.AndAsync("dia123 the member requests the current user", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 58
+    await testRunner.ThenAsync("the operatorless answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 45
-    await testRunner.ThenAsync("dia123 the current user answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 59
+    await testRunner.AndAsync("the operatorless current user has the role \"Member\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 9 - GET /me takes role and permissions from the membership row")]
-        public async global::System.Threading.Tasks.Task Criterion9_GETMeTakesRoleAndPermissionsFromTheMembershipRow()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "7";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 9 - GET /me takes role and permissions from the membership row", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
-            string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = null;
-#line 47
-  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line 60
+    await testRunner.AndAsync("the operatorless current user has at least one permission", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                await testRunner.SkipScenarioAsync();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 48
-    await testRunner.GivenAsync("dia123 the member holds a membership in the development organization and is switc" +
-                        "hed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 61
+    await testRunner.WhenAsync("the operatorless ordinary account\'s membership is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 49
-    await testRunner.WhenAsync("dia123 the member requests the current user", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 62
+    await testRunner.AndAsync("the operatorless caller requests the current user", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 50
-    await testRunner.ThenAsync("dia123 the current user answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 51
-    await testRunner.AndAsync("dia123 the current user has a non-null organizationRole and some permissions", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 63
+    await testRunner.ThenAsync("the operatorless answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

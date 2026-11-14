@@ -203,6 +203,19 @@ public class PlatformOperatorSteps(
         organization.GetProperty("role").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Null);
     }
 
+    [Then("the current user's organizations hold my home workspace with its role and the entered workspace without a role")]
+    public void CurrentUserOrganizationsHoldHomeAndEntered()
+    {
+        var organizations = context.LastJson!.RootElement.GetProperty("organizations")
+            .EnumerateArray().ToList();
+
+        var home = organizations.Single(o => o.GetProperty("id").GetGuid() == context.HomeOrganizationId!.Value);
+        home.GetProperty("role").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.String);
+
+        var entered = organizations.Single(o => o.GetProperty("id").GetGuid() == context.ForeignOrganizationId!.Value);
+        entered.GetProperty("role").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Null);
+    }
+
     [Then("entering is refused")]
     public void EnteringIsRefused() => _entered.ShouldBeNull();
 

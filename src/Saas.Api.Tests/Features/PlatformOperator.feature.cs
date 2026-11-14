@@ -351,6 +351,10 @@ namespace Saas.Api.Tests.Features
 #line 43
         await testRunner.AndAsync("the current user\'s organization is the entered workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
+#line 44
+        await testRunner.AndAsync("the current user\'s organizations hold my home workspace with its role and the ent" +
+                        "ered workspace without a role", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
             }
             await this.ScenarioCleanupAsync();
         }
@@ -365,7 +369,7 @@ namespace Saas.Api.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("An ordinary account cannot enter a workspace that exists but is not theirs", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 45
+#line 46
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -378,13 +382,13 @@ namespace Saas.Api.Tests.Features
 #line 6
     await this.FeatureBackgroundAsync();
 #line hidden
-#line 46
+#line 47
         await testRunner.GivenAsync("I am signed in as an ordinary account", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 47
+#line 48
         await testRunner.WhenAsync("I enter the operator\'s own workspace", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 48
+#line 49
         await testRunner.ThenAsync("entering is refused", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
@@ -401,7 +405,7 @@ namespace Saas.Api.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Having entered, the operator is scoped to that one workspace", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 50
+#line 51
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -414,25 +418,25 @@ namespace Saas.Api.Tests.Features
 #line 6
     await this.FeatureBackgroundAsync();
 #line hidden
-#line 51
+#line 52
         await testRunner.GivenAsync("I am signed in as the development user", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 52
+#line 53
         await testRunner.AndAsync("I have started a run", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 53
+#line 54
         await testRunner.AndAsync("I have entered the workspace belonging to somebody else", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 54
+#line 55
         await testRunner.WhenAsync("I request \"/runs\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 55
+#line 56
         await testRunner.ThenAsync("the response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 56
+#line 57
         await testRunner.ButAsync("my own workspace\'s run is no longer visible to me", ((string)(null)), ((global::Reqnroll.Table)(null)), "But ");
 #line hidden
-#line 57
+#line 58
         await testRunner.AndAsync("the run is still there for the workspace it belongs to", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }

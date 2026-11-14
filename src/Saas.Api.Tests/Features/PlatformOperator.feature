@@ -41,6 +41,7 @@ Feature: Platform operator
         Then the response status is 200
         And the current user has no organization role and no permissions
         And the current user's organization is the entered workspace
+        And the current user's organizations hold my home workspace with its role and the entered workspace without a role
 
     Scenario: An ordinary account cannot enter a workspace that exists but is not theirs
         Given I am signed in as an ordinary account
