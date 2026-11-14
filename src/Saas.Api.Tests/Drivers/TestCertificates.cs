@@ -61,13 +61,10 @@ public sealed class TestCertificates : IDisposable
                 Directory.Delete(Folder, recursive: true);
             }
         }
-        catch (IOException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            // Best effort: a leftover temp folder must not fail the run.
-        }
-        catch (UnauthorizedAccessException)
-        {
-            // Same.
+            // A leftover temp folder must not fail the run, but it holds private keys, so say where it is.
+            Console.Error.WriteLine($"Could not delete test certificate folder '{Folder}': {ex.Message}");
         }
     }
 

@@ -146,6 +146,7 @@ public static class TestHosts
         {
             // Always remove the temporary certificate folder, even if a disposal above threw.
             _certificates?.Dispose();
+            _certificates = null;
         }
     }
 

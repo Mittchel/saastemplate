@@ -44,18 +44,23 @@ public class TestCertificatesSteps(ScenarioContext scenario)
         Directory.CreateDirectory(parent);
         scenario[FailureParentKey] = parent;
 
-        Should.Throw<Exception>(() => TestCertificates.Create(parent, "not a distinguished name"));
+        Should.Throw<System.Security.Cryptography.CryptographicException>(() => TestCertificates.Create(parent, "not a distinguished name"));
     }
 
     [Then("no certificate folder is left behind")]
-    public void NoFolderLeft()
+    public void NoFolderLeft() =>
+        Directory.EnumerateFileSystemEntries(scenario.Get<string>(FailureParentKey)).ShouldBeEmpty();
+
+    /// <summary>Removes what a scenario created even when one of its steps failed.</summary>
+    [AfterScenario]
+    public void CleanUp()
     {
-        var parent = scenario.Get<string>(FailureParentKey);
-        try
+        if (scenario.TryGetValue(OwnCertificatesKey, out TestCertificates? own))
         {
-            Directory.EnumerateFileSystemEntries(parent).ShouldBeEmpty();
+            own.Dispose();
         }
-        finally
+
+        if (scenario.TryGetValue(FailureParentKey, out string? parent) && Directory.Exists(parent))
         {
             Directory.Delete(parent, recursive: true);
         }
