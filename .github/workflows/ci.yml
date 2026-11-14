@@ -80,6 +80,7 @@ jobs:
           ClientSecret: ci_client
           Postgres: Host=localhost;Port=15432;Database=saas;Username=saas_app;Password=ci_app
           PostgresOwner: Host=localhost;Port=15432;Database=saas;Username=saas_owner;Password=ci_owner
+          AiPostgres: Host=localhost;Port=15432;Database=saas;Username=saas_ai;Password=ci_ai
 
       - name: Service logs on failure
         if: failure()
