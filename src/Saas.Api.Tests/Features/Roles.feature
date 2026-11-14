@@ -46,6 +46,8 @@ Feature: Roles
         Then the response status is 404
         And the error names "Organization"
 
+    # PUT and DELETE /organizations/{id} only show the 404 contract: without the active-organization
+    # check the row-level-secured lookup hides the foreign row and gives the same "Organization" 404.
     Scenario: The other organization endpoints answer 404 for another organization's id
         Given the development user is signed in as a second caller
         When I send PUT to another organization's ""

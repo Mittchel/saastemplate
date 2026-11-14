@@ -342,7 +342,7 @@ namespace Saas.Api.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("The other organization endpoints answer 404 for another organization\'s id", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 49
+#line 51
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -352,53 +352,53 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 50
+#line 52
         await testRunner.GivenAsync("the development user is signed in as a second caller", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 51
+#line 53
         await testRunner.WhenAsync("I send PUT to another organization\'s \"\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 52
-        await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 53
-        await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
 #line 54
-        await testRunner.WhenAsync("I send DELETE to another organization\'s \"\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 55
-        await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 56
-        await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+        await testRunner.WhenAsync("I send DELETE to another organization\'s \"\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 57
-        await testRunner.WhenAsync("I send GET to another organization\'s \"/invitations\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 58
-        await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 59
-        await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+        await testRunner.WhenAsync("I send GET to another organization\'s \"/invitations\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 60
-        await testRunner.WhenAsync("I send POST to another organization\'s \"/invitations\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 61
         await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 62
+#line 61
         await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
+#line 62
+        await testRunner.WhenAsync("I send POST to another organization\'s \"/invitations\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
 #line 63
+        await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 64
+        await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 65
         await testRunner.WhenAsync("I send DELETE to another organization\'s \"/invitations/00000000-0000-0000-0000-000" +
                         "000000001\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 64
+#line 66
         await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 65
+#line 67
         await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -417,7 +417,7 @@ namespace Saas.Api.Tests.Features
                     "ame token", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 67
+#line 69
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -427,37 +427,37 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 68
+#line 70
         await testRunner.GivenAsync("an ordinary account has been switched into the development user\'s organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 69
+#line 71
         await testRunner.AndAsync("the development user is signed in as a second caller", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 70
-        await testRunner.WhenAsync("I request the members of my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 71
-        await testRunner.ThenAsync("the response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
 #line 72
-        await testRunner.WhenAsync("I change the account\'s role in my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.WhenAsync("I request the members of my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 73
         await testRunner.ThenAsync("the response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 74
-        await testRunner.WhenAsync("I request the invitations of my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.WhenAsync("I change the account\'s role in my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 75
         await testRunner.ThenAsync("the response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 76
-        await testRunner.WhenAsync("the development user promotes the account to Admin", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.WhenAsync("I request the invitations of my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 77
-        await testRunner.AndAsync("I request the members of my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+        await testRunner.ThenAsync("the response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 78
+        await testRunner.WhenAsync("the development user promotes the account to Admin", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 79
+        await testRunner.AndAsync("I request the members of my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 80
         await testRunner.ThenAsync("the response status is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }

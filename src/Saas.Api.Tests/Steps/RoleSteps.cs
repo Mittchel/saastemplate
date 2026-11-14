@@ -23,29 +23,36 @@ public class RoleSteps(
     TestSettings settings,
     ApiScenarioContext context)
 {
+    // The identity service allows 60 token requests a minute per client, and the whole run is one client.
+    // The development user's access token (only ever used as a bearer, never refreshed, valid 30 minutes)
+    // and the ordinary account's personal organization id do not change during a run, so they are fetched
+    // once per run instead of once per scenario.
+    private static AuthDriver.TokenPair? _runDevTokens;
+    private static Guid? _runForeignOrganizationId;
+
     private Guid? _sharedOrganizationId;
     private Guid? _memberUserId;
     private AuthDriver.TokenPair? _devTokens;
     private Guid _devOrganizationId;
     private AuthDriver.TokenPair? _memberPersonalTokens;
-    private Guid? _foreignOrganizationId;
     private string _lastBody = string.Empty;
 
     [Given("an ordinary account has been switched into the development user's organization")]
     public async Task OrdinaryAccountSwitchedIn()
     {
-        var devTokens = (await auth.SignInAsync(settings.DevUserEmail, settings.DevUserPassword))
-            .ShouldNotBeNull("could not sign in as the development user");
+        var devTokens = await DevTokensAsync();
         var organizationId = Guid.Parse(AuthDriver.ReadClaim(devTokens.AccessToken, "org_id")!);
 
         var memberTokens = (await auth.SignInAsync(settings.MemberUserEmail, settings.MemberUserPassword))
             .ShouldNotBeNull("could not sign in as the ordinary account");
         var userId = Guid.Parse(AuthDriver.ReadClaim(memberTokens.AccessToken, "sub")!);
 
-        // Kept for the later steps: the identity service rate limits token requests, so a scenario signs in once per account.
         _devTokens = devTokens;
         _devOrganizationId = organizationId;
         _memberPersonalTokens = memberTokens;
+
+        // Read while the personal token is still fresh, so the foreign-id scenarios need no sign-in of their own.
+        await ForeignOrganizationIdAsync();
 
         // Recorded before the insert so the hook cleans up even if a later step fails.
         _sharedOrganizationId = organizationId;
@@ -93,8 +100,7 @@ public class RoleSteps(
     [Given("the development user is signed in as a second caller")]
     public async Task DevelopmentUserSignedInAsSecondCaller()
     {
-        _devTokens ??= (await auth.SignInAsync(settings.DevUserEmail, settings.DevUserPassword))
-            .ShouldNotBeNull("could not sign in as the development user");
+        _devTokens ??= await DevTokensAsync();
         _devOrganizationId = Guid.Parse(AuthDriver.ReadClaim(_devTokens.AccessToken, "org_id")!);
     }
 
@@ -214,7 +220,7 @@ public class RoleSteps(
     // The ordinary account's own personal organization stands in for "somebody else's".
     private async Task<Guid> ForeignOrganizationIdAsync()
     {
-        if (_foreignOrganizationId is { } known)
+        if (_runForeignOrganizationId is { } known)
         {
             return known;
         }
@@ -226,12 +232,17 @@ public class RoleSteps(
         listing.EnsureSuccessStatusCode();
         using var organizations = JsonDocument.Parse(await listing.Content.ReadAsStringAsync());
 
-        _foreignOrganizationId = organizations.RootElement.EnumerateArray()
+        _runForeignOrganizationId = organizations.RootElement.EnumerateArray()
             .First(o => o.GetProperty("isPersonal").GetBoolean())
             .GetProperty("id").GetGuid();
 
-        return _foreignOrganizationId.Value;
+        return _runForeignOrganizationId.Value;
     }
+
+    // Signed in once per run; see the note on _runDevTokens.
+    private async Task<AuthDriver.TokenPair> DevTokensAsync() =>
+        _runDevTokens ??= (await auth.SignInAsync(settings.DevUserEmail, settings.DevUserPassword))
+            .ShouldNotBeNull("could not sign in as the development user");
 
     [AfterScenario]
     public async Task RemoveAddedMembership()

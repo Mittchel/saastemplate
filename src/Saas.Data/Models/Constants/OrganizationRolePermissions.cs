@@ -11,7 +11,9 @@ namespace Saas.Data.Models.Constants;
 /// </remarks>
 public static class OrganizationRolePermissions
 {
-    private static readonly string[] HrAdmin =
+    // Shared by every Owner and Admin lookup, so it is read-only: a caller casting it back to an
+    // array and writing to it would otherwise change those roles' permissions for the whole process.
+    private static readonly IReadOnlyList<string> HrAdmin = Array.AsReadOnly<string>(
     [
         Permissions.OrganizationRead, Permissions.OrganizationWrite, Permissions.OrganizationDelete,
         Permissions.MemberRead, Permissions.MemberInvite, Permissions.MemberWrite, Permissions.MemberRemove,
@@ -19,7 +21,7 @@ public static class OrganizationRolePermissions
         Permissions.TeamRead, Permissions.TeamWrite,
         Permissions.EmployeeRead, Permissions.EmployeeWrite, Permissions.EmployeeImport,
         Permissions.InvitationManage, Permissions.OrgChartRead, Permissions.ProfileOwn,
-    ];
+    ]);
 
     public static IReadOnlyList<string> For(OrganizationRole role) => role switch
     {
