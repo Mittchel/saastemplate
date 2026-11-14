@@ -87,9 +87,6 @@ public class TestCertificatesSteps
     {
         var full = Path.GetFullPath(path);
         var parent = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
-        // macOS temp lives under /var, a symlink to /private/var; compare resolved paths too.
-        return full.StartsWith(parent, StringComparison.Ordinal)
-            || (Directory.ResolveLinkTarget(full, true)?.FullName ?? full)
-                .StartsWith(Directory.ResolveLinkTarget(parent, true)?.FullName ?? parent, StringComparison.Ordinal);
+        return full.StartsWith(parent, StringComparison.Ordinal);
     }
 }
