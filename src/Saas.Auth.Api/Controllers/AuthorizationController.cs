@@ -293,9 +293,9 @@ public class AuthorizationController(
     /// </summary>
     /// <remarks>
     /// Expanding the role into permission claims here means the resource API
-    /// only ever checks permissions and never has to know about roles. The
-    /// claims are for the UI only: the resource API does not trust them and
-    /// looks the caller's role up on every request.
+    /// only ever checks permissions and never has to know about roles, and that
+    /// a role change takes effect on the next token rather than requiring a
+    /// lookup on every request.
     /// </remarks>
     private async Task<ClaimsPrincipal> BuildPrincipalAsync(
         UserEntity user,
