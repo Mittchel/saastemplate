@@ -175,9 +175,9 @@ public class PlatformOperatorSteps(
     {
         // The point of the scenario. Entering somebody else's workspace is not
         // additive: the operator trades their own tenant for that one, so a run
-        // they created moments ago and still own is now out of scope.
-        // Asked directly as the runtime role -- so the
-        // scoping is the row-level security policy, not an EF query filter.
+        // they created moments ago and still own is now out of scope. The API
+        // answers 403 in that workspace (no membership), so the scoping is checked
+        // directly in the database as the runtime role, under row-level security.
         var entered = await database.CountAsTenantAsync(
             "Runs", context.ForeignOrganizationId!.Value);
 
