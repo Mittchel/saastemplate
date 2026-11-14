@@ -38,6 +38,7 @@ jobs:
           sed -i 's|^ConnectionStrings__DefaultConnection=.*|ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=saas;Username=saas_app;Password=ci_app|' .env
           sed -i 's|^AI_DATABASE_URL=.*|AI_DATABASE_URL=postgresql://saas_ai:ci_ai@postgres:5432/saas|' .env
           sed -i 's/^OIDC_CLIENT_SECRET=.*/OIDC_CLIENT_SECRET=ci_client/' .env
+          sed -i 's/^PLATFORM_ADMIN_EMAIL=.*/PLATFORM_ADMIN_EMAIL=dev@saas.local/' .env
           sed -i 's/^AUTH_SECRET=.*/AUTH_SECRET=ci_auth_secret_not_used_in_production/' .env
           sed -i 's/^OIDC_SIGNING_CERT_PASSWORD=.*/OIDC_SIGNING_CERT_PASSWORD=ci_cert/' .env
           sed -i 's/^OIDC_ENCRYPTION_CERT_PASSWORD=.*/OIDC_ENCRYPTION_CERT_PASSWORD=ci_cert/' .env
@@ -54,6 +55,8 @@ jobs:
               -keypbe AES-256-CBC -certpbe AES-256-CBC -macalg sha256
             rm "certs/$name.key" "certs/$name.crt"
           done
+          # openssl writes the bundles readable by this user only; the containers run as another user.
+          chmod 644 certs/*.pfx
 
       - name: Start the stack
         run: docker compose up -d --build postgres auth api ai redis
@@ -72,6 +75,12 @@ jobs:
 
       - name: Integration tests
         run: dotnet test src/Saas.Api.Tests --configuration Release --no-build
+        # integrationsettings.json holds the local development passwords; these are the ones set above.
+        env:
+          ClientSecret: ci_client
+          Postgres: Host=localhost;Port=15432;Database=saas;Username=saas_app;Password=ci_app
+          PostgresOwner: Host=localhost;Port=15432;Database=saas;Username=saas_owner;Password=ci_owner
+          AiPostgres: Host=localhost;Port=15432;Database=saas;Username=saas_ai;Password=ci_ai
 
       - name: Service logs on failure
         if: failure()
@@ -95,7 +104,8 @@ jobs:
       - run: npm ci
 
       - name: Typecheck
-        run: npx tsc --noEmit
+        # Next.js 16 generates the route types (LayoutProps, PageProps) that tsc needs; build does it, tsc alone does not.
+        run: npx next typegen && npx tsc --noEmit
 
       - name: Lint
         run: npm run lint
