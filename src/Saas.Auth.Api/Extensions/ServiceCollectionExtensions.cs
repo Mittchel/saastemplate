@@ -180,15 +180,18 @@ public static class ServiceCollectionExtensions
             return false;
         }
 
+        // EphemeralKeySet is not supported on macOS, where the default flags are used.
+        var flags = OperatingSystem.IsMacOS() ? X509KeyStorageFlags.DefaultKeySet : X509KeyStorageFlags.EphemeralKeySet;
+
         signing = X509CertificateLoader.LoadPkcs12FromFile(
             options.SigningCertificatePath!,
             options.SigningCertificatePassword,
-            X509KeyStorageFlags.EphemeralKeySet);
+            flags);
 
         encryption = X509CertificateLoader.LoadPkcs12FromFile(
             options.EncryptionCertificatePath!,
             options.EncryptionCertificatePassword,
-            X509KeyStorageFlags.EphemeralKeySet);
+            flags);
 
         return true;
     }
