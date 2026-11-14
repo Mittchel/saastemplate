@@ -7,6 +7,12 @@ namespace Saas.Api.Tests.Drivers;
 /// <summary>Talks to the resource API as a given user.</summary>
 public class ApiDriver
 {
+    /// <param name="settings">Kept so callers construct it like <see cref="AuthDriver"/>; the client comes from the in-process host.</param>
+    public ApiDriver(TestSettings settings)
+    {
+        _ = settings;
+    }
+
     private readonly HttpClient _client = TestHosts.CreateApiClient();
 
     public void Authenticate(string accessToken) =>
