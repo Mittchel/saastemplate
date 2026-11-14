@@ -9,6 +9,20 @@ namespace Saas.Api.Tests.Hooks;
 [Binding]
 public class DriverHooks(IObjectContainer container)
 {
+    [BeforeTestRun]
+    public static async Task StartHosts()
+    {
+        var settings = new TestSettings();
+
+        await TestHosts.StartAsync(
+            settings.ClientId,
+            settings.ClientSecret,
+            settings.DevUserEmail);
+    }
+
+    [AfterTestRun]
+    public static Task StopHosts() => TestHosts.StopAsync();
+
     [BeforeScenario(Order = 0)]
     public void RegisterDrivers()
     {
@@ -16,7 +30,7 @@ public class DriverHooks(IObjectContainer container)
 
         container.RegisterInstanceAs(settings);
         container.RegisterInstanceAs(new AuthDriver(settings));
-        container.RegisterInstanceAs(new ApiDriver(settings));
+        container.RegisterInstanceAs(new ApiDriver());
         container.RegisterInstanceAs(new DatabaseDriver(settings));
         container.RegisterInstanceAs(new ApiScenarioContext());
     }

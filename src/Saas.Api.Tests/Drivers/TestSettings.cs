@@ -6,11 +6,14 @@ namespace Saas.Api.Tests.Drivers;
 /// Where the tests point.
 /// </summary>
 /// <remarks>
-/// These are integration tests against the running compose stack rather than an
-/// in-memory <c>WebApplicationFactory</c>. That is deliberate: the guarantee
-/// most worth testing is Postgres row-level security, and an in-memory or
-/// SQLite database has no RLS to enforce -- a passing test there would prove
-/// nothing. Start the stack with <c>docker compose up -d</c> first.
+/// These are integration tests, but not against the compose stack: each run
+/// starts its own Postgres container with Testcontainers and hosts
+/// <c>Saas.Api</c> and <c>Saas.Auth.Api</c> in-process from the working tree
+/// (see <see cref="TestHosts"/>). Postgres stays real because the guarantee
+/// most worth testing is row-level security, and an in-memory or SQLite database
+/// has none to enforce. Running the tests needs Docker, not the compose stack.
+/// The database connection strings therefore come from the container, not from
+/// <c>integrationsettings.json</c>.
 /// </remarks>
 public class TestSettings
 {
@@ -19,11 +22,20 @@ public class TestSettings
         .AddEnvironmentVariables()
         .Build();
 
-    public string AuthBaseUrl => Get("AuthBaseUrl");
-    public string ApiBaseUrl => Get("ApiBaseUrl");
-    public string AiBaseUrl => Get("AiBaseUrl");
-    public string Postgres => Get("Postgres");
-    public string PostgresOwner => Get("PostgresOwner");
+    /// <summary>The container's <c>saas_app</c> login: the runtime role, subject to RLS.</summary>
+    public string Postgres => Started(TestHosts.AppConnectionString);
+
+    /// <summary>The container's <c>saas_owner</c> login: owns the tables and runs migrations.</summary>
+    public string PostgresOwner => Started(TestHosts.OwnerConnectionString);
+
+    /// <summary>The container's <c>saas_ai</c> login, which has no access to business tables.</summary>
+    public string PostgresAi => Started(TestHosts.AiConnectionString);
+
+    private static string Started(string connectionString) =>
+        connectionString.Length > 0
+            ? connectionString
+            : throw new InvalidOperationException("Test hosts are not started.");
+
     public string ClientId => Get("ClientId");
     public string ClientSecret => Get("ClientSecret");
     public string DevUserEmail => Get("DevUserEmail");

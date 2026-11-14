@@ -75,7 +75,7 @@ public class AuthenticationSteps(
     public async Task RequestWithoutToken(string path)
     {
         // A driver with no Authorize header, so this really is unauthenticated.
-        var anonymous = new ApiDriver(settings);
+        var anonymous = new ApiDriver();
         var response = await anonymous.GetAsync(path);
 
         context.LastStatusCode = (int)response.StatusCode;

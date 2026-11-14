@@ -5,9 +5,9 @@ using System.Text.Json;
 namespace Saas.Api.Tests.Drivers;
 
 /// <summary>Talks to the resource API as a given user.</summary>
-public class ApiDriver(TestSettings settings)
+public class ApiDriver
 {
-    private readonly HttpClient _client = new() { BaseAddress = new Uri(settings.ApiBaseUrl) };
+    private readonly HttpClient _client = TestHosts.CreateApiClient();
 
     public void Authenticate(string accessToken) =>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);

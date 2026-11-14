@@ -147,12 +147,14 @@ workspace, so looking at someone's data leaves a trail.
 
 ## Testing
 
-The integration tests run against the live stack, not an in-memory host,
-because the guarantee most worth testing is Postgres row-level security and an
-in-memory database has none to enforce.
+The integration tests start their own Postgres (`pgvector/pgvector:pg17`) with
+Testcontainers and host `Saas.Api` and `Saas.Auth.Api` in-process with
+`WebApplicationFactory`, so they test the working tree's code on a database of
+their own. They need Docker, not the compose stack. Postgres stays real, not an
+in-memory database, because the guarantee most worth testing is row-level
+security and an in-memory database has none to enforce.
 
 ```bash
-docker compose up -d
 dotnet test src/Saas.Api.Tests
 ```
 

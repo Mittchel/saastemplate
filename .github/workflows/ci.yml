@@ -24,67 +24,12 @@ jobs:
       - name: Build
         run: dotnet build Saas.slnx --configuration Release
 
-      # The integration tests run against the real stack rather than an
-      # in-memory host, because the guarantee most worth testing is Postgres
-      # row-level security and an in-memory database has none to enforce.
-      - name: Prepare environment
-        run: |
-          cp .env.example .env
-          sed -i 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci_postgres/' .env
-          sed -i 's/^SAAS_OWNER_PASSWORD=.*/SAAS_OWNER_PASSWORD=ci_owner/' .env
-          sed -i 's/^SAAS_APP_PASSWORD=.*/SAAS_APP_PASSWORD=ci_app/' .env
-          sed -i 's/^SAAS_AI_PASSWORD=.*/SAAS_AI_PASSWORD=ci_ai/' .env
-          sed -i 's|^ConnectionStrings__Migrations=.*|ConnectionStrings__Migrations=Host=postgres;Port=5432;Database=saas;Username=saas_owner;Password=ci_owner|' .env
-          sed -i 's|^ConnectionStrings__DefaultConnection=.*|ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=saas;Username=saas_app;Password=ci_app|' .env
-          sed -i 's|^AI_DATABASE_URL=.*|AI_DATABASE_URL=postgresql://saas_ai:ci_ai@postgres:5432/saas|' .env
-          sed -i 's/^OIDC_CLIENT_SECRET=.*/OIDC_CLIENT_SECRET=ci_client/' .env
-          sed -i 's/^PLATFORM_ADMIN_EMAIL=.*/PLATFORM_ADMIN_EMAIL=dev@saas.local/' .env
-          sed -i 's/^AUTH_SECRET=.*/AUTH_SECRET=ci_auth_secret_not_used_in_production/' .env
-          sed -i 's/^OIDC_SIGNING_CERT_PASSWORD=.*/OIDC_SIGNING_CERT_PASSWORD=ci_cert/' .env
-          sed -i 's/^OIDC_ENCRYPTION_CERT_PASSWORD=.*/OIDC_ENCRYPTION_CERT_PASSWORD=ci_cert/' .env
-
-      - name: Generate signing certificates
-        run: |
-          mkdir -p certs
-          for name in signing encryption; do
-            openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes \
-              -keyout "certs/$name.key" -out "certs/$name.crt" -subj "/CN=CI $name"
-            openssl pkcs12 -export -out "certs/$name.pfx" \
-              -inkey "certs/$name.key" -in "certs/$name.crt" \
-              -passout pass:ci_cert \
-              -keypbe AES-256-CBC -certpbe AES-256-CBC -macalg sha256
-            rm "certs/$name.key" "certs/$name.crt"
-          done
-          # openssl writes the bundles readable by this user only; the containers run as another user.
-          chmod 644 certs/*.pfx
-
-      - name: Start the stack
-        run: docker compose up -d --build postgres auth api ai redis
-
-      - name: Wait for health
-        run: |
-          for _ in $(seq 1 60); do
-            unhealthy=$(docker compose ps --format '{{.Health}}' | grep -cv healthy || true)
-            [ "$unhealthy" = "0" ] && echo "all healthy" && exit 0
-            sleep 5
-          done
-          echo "services did not become healthy"
-          docker compose ps
-          docker compose logs --tail 80
-          exit 1
-
+      # The integration tests start their own Postgres container (Testcontainers)
+      # and host the API and identity service in-process, so they need only
+      # Docker: no compose stack, .env or certificates. Postgres stays real
+      # because the guarantee most worth testing is row-level security.
       - name: Integration tests
         run: dotnet test src/Saas.Api.Tests --configuration Release --no-build
-        # integrationsettings.json holds the local development passwords; these are the ones set above.
-        env:
-          ClientSecret: ci_client
-          Postgres: Host=localhost;Port=15432;Database=saas;Username=saas_app;Password=ci_app
-          PostgresOwner: Host=localhost;Port=15432;Database=saas;Username=saas_owner;Password=ci_owner
-          AiPostgres: Host=localhost;Port=15432;Database=saas;Username=saas_ai;Password=ci_ai
-
-      - name: Service logs on failure
-        if: failure()
-        run: docker compose logs --tail 200
 
   web:
     name: Frontend typecheck, lint and build

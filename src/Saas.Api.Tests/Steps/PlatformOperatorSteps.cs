@@ -59,7 +59,7 @@ public class PlatformOperatorSteps(
 
                 // A driver of its own, so establishing the fixture does not
                 // disturb whoever the scenario goes on to sign in as.
-                var theirs = new ApiDriver(settings);
+                var theirs = new ApiDriver();
                 theirs.Authenticate(tokens.AccessToken);
 
                 using var organizations = await theirs.GetJsonAsync("/organizations");

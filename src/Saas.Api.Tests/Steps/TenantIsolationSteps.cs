@@ -7,6 +7,7 @@ namespace Saas.Api.Tests.Steps;
 
 [Binding]
 public class TenantIsolationSteps(
+    TestSettings settings,
     ApiDriver api,
     DatabaseDriver database,
     ApiScenarioContext context)
@@ -66,8 +67,7 @@ public class TenantIsolationSteps(
         // The AI service reaches business data only through the API, carrying
         // the user's token. Its database role has no grant on these tables at
         // all, so even a compromised agent cannot query around the API.
-        var aiConnection = Environment.GetEnvironmentVariable("AiPostgres")
-            ?? "Host=localhost;Port=15432;Database=saas;Username=saas_ai;Password=devai";
+        var aiConnection = settings.PostgresAi;
 
         // Schema-qualified: the AI role has search_path = ai, so a bare name
         // would resolve to a table that simply does not exist there rather than
