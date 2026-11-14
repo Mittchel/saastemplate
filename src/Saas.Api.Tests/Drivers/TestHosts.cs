@@ -48,6 +48,9 @@ public static class TestHosts
     /// <summary>Path of this run's generated signing <c>.pfx</c>, or null when not started.</summary>
     public static string? SigningCertificatePath => _certificates?.SigningCertificatePath;
 
+    /// <summary>Password of this run's generated <c>.pfx</c> files, or null when not started.</summary>
+    public static string? CertificatePassword => _certificates?.Password;
+
     public static string AppConnectionString { get; private set; } = string.Empty;
     public static string OwnerConnectionString { get; private set; } = string.Empty;
     public static string AiConnectionString { get; private set; } = string.Empty;
