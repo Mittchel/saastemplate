@@ -23,13 +23,18 @@ public class TestSettings
         .Build();
 
     /// <summary>The container's <c>saas_app</c> login: the runtime role, subject to RLS.</summary>
-    public string Postgres => TestHosts.AppConnectionString;
+    public string Postgres => Started(TestHosts.AppConnectionString);
 
     /// <summary>The container's <c>saas_owner</c> login: owns the tables and runs migrations.</summary>
-    public string PostgresOwner => TestHosts.OwnerConnectionString;
+    public string PostgresOwner => Started(TestHosts.OwnerConnectionString);
 
     /// <summary>The container's <c>saas_ai</c> login, which has no access to business tables.</summary>
-    public string PostgresAi => TestHosts.AiConnectionString;
+    public string PostgresAi => Started(TestHosts.AiConnectionString);
+
+    private static string Started(string connectionString) =>
+        connectionString.Length > 0
+            ? connectionString
+            : throw new InvalidOperationException("Test hosts are not started.");
 
     public string ClientId => Get("ClientId");
     public string ClientSecret => Get("ClientSecret");

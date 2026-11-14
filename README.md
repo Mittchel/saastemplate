@@ -147,14 +147,12 @@ workspace, so looking at someone's data leaves a trail.
 
 ## Testing
 
-The integration tests start their own Postgres container with Testcontainers
-(`pgvector/pgvector:pg17`, logins created by `src/Saas.Data/scripts/00-init.sh`)
-and host `Saas.Api` and `Saas.Auth.Api` in-process from the working tree. The
-database is real Postgres because the guarantee most worth testing is row-level
-security, which an in-memory database cannot enforce. They need Docker, not the
-compose stack.
+The integration tests run against the live stack, not an in-memory host,
+because the guarantee most worth testing is Postgres row-level security and an
+in-memory database has none to enforce.
 
 ```bash
+docker compose up -d
 dotnet test src/Saas.Api.Tests
 ```
 
