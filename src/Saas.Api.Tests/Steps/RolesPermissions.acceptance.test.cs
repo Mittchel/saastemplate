@@ -40,9 +40,9 @@ public sealed class RolesPermissionsAcceptanceSteps
         await _db.AddMembershipAsync(_orgId, _memberId, role);
         _membershipAdded = true;
 
-        var (tokens, status) = await _auth.SwitchOrganizationAsync(member.RefreshToken, _orgId.ToString());
+        var (tokens, status) = await _auth.SwitchOrganizationAsync(member.RefreshToken, _orgId);
         status.ShouldBeInRange(200, 299);
-        _api.AccessToken = tokens!.AccessToken;
+        _api.Authenticate(tokens!.AccessToken);
     }
 
     [When("acceptance: the member's raw role is set to {int}")]
@@ -70,7 +70,7 @@ public sealed class RolesPermissionsAcceptanceSteps
     {
         var dev = await _auth.SignInAsync(_settings.DevUserEmail, _settings.DevUserPassword);
         _orgForPaths = AuthDriver.ReadClaim(dev!.AccessToken, "org_id")!;
-        _api.AccessToken = dev.AccessToken;
+        _api.Authenticate(dev.AccessToken);
     }
 
     [Given("acceptance: the development user entered a foreign workspace")]
@@ -78,12 +78,12 @@ public sealed class RolesPermissionsAcceptanceSteps
     {
         var dev = await _auth.SignInAsync(_settings.DevUserEmail, _settings.DevUserPassword);
         var own = AuthDriver.ReadClaim(dev!.AccessToken, "org_id");
-        var other = await _auth.RegisterAsync($"acc-{Guid.NewGuid():N}@example.com", "Acceptance-Pass-1!");
+        var other = await _auth.SignInAsync(_settings.MemberUserEmail, _settings.MemberUserPassword);
         var foreign = AuthDriver.ReadClaim(other!.AccessToken, "org_id")!;
         foreign.ShouldNotBe(own);
-        var (tokens, status) = await _auth.SwitchOrganizationAsync(dev.RefreshToken, foreign);
+        var (tokens, status) = await _auth.SwitchOrganizationAsync(dev.RefreshToken, Guid.Parse(foreign));
         status.ShouldBeInRange(200, 299);
-        _api.AccessToken = tokens!.AccessToken;
+        _api.Authenticate(tokens!.AccessToken);
         _orgForPaths = foreign;
     }
 
