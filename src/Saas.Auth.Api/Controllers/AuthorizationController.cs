@@ -292,9 +292,10 @@ public class AuthorizationController(
     /// implied by the caller's organization role.
     /// </summary>
     /// <remarks>
-    /// The permission claims are for the UI only. The resource API ignores them
-    /// and resolves permissions per request from the caller's membership row,
-    /// so a role change applies on the next request, not the next token.
+    /// Expanding the role into permission claims here means the resource API
+    /// only ever checks permissions and never has to know about roles, and that
+    /// a role change takes effect on the next token rather than requiring a
+    /// lookup on every request.
     /// </remarks>
     private async Task<ClaimsPrincipal> BuildPrincipalAsync(
         UserEntity user,
