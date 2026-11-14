@@ -37,6 +37,7 @@ public static class TestHosts
     /// <summary>Issuer written into tokens and expected by the API. Never resolved over a network.</summary>
     private const string Issuer = "http://auth.test";
 
+    private static TestCertificates? _certificates;
     private static PostgreSqlContainer? _postgres;
     private static WebApplicationFactory<ApiEntryPoint>? _api;
     private static WebApplicationFactory<AuthEntryPoint>? _auth;
@@ -57,6 +58,8 @@ public static class TestHosts
     {
         try
         {
+            _certificates = TestCertificates.Create();
+
             _postgres = new PostgreSqlBuilder("pgvector/pgvector:pg17")
                 .WithDatabase(Database)
                 .WithUsername("postgres")
@@ -76,7 +79,7 @@ public static class TestHosts
             _api = new ApiFactory(AppConnectionString, OwnerConnectionString, () => _auth!);
             _ = _api.Server;
 
-            _auth = new AuthFactory(AppConnectionString, clientId, clientSecret, administratorEmail);
+            _auth = new AuthFactory(AppConnectionString, _certificates, clientId, clientSecret, administratorEmail);
             _ = _auth.Server;
         }
         catch
@@ -110,6 +113,8 @@ public static class TestHosts
         {
             await _postgres.DisposeAsync();
         }
+
+        _certificates?.Dispose();
     }
 
     /// <summary>Runs the repository's own init script, so the roles are never re-declared here.</summary>
@@ -188,6 +193,7 @@ public static class TestHosts
 
     private sealed class AuthFactory(
         string appConnectionString,
+        TestCertificates certificates,
         string clientId,
         string clientSecret,
         string administratorEmail) : WebApplicationFactory<AuthEntryPoint>
@@ -197,6 +203,11 @@ public static class TestHosts
             ConfigureCommon(builder, appConnectionString);
 
             builder.UseSetting("OpenIddict:Issuer", Issuer + "/");
+            // Files, so the service never reaches the development certificates in the OS store.
+            builder.UseSetting("OpenIddict:SigningCertificatePath", certificates.SigningCertificatePath);
+            builder.UseSetting("OpenIddict:SigningCertificatePassword", certificates.Password);
+            builder.UseSetting("OpenIddict:EncryptionCertificatePath", certificates.EncryptionCertificatePath);
+            builder.UseSetting("OpenIddict:EncryptionCertificatePassword", certificates.Password);
             builder.UseSetting("OpenIddict:Clients:0:ClientId", clientId);
             builder.UseSetting("OpenIddict:Clients:0:ClientSecret", clientSecret);
             builder.UseSetting("Platform:AdministratorEmail", administratorEmail);
