@@ -53,27 +53,35 @@ public static class TestHosts
 
     public static async Task StartAsync(string clientId, string clientSecret, string administratorEmail)
     {
-        _postgres = new PostgreSqlBuilder("pgvector/pgvector:pg17")
-            .WithDatabase(Database)
-            .WithUsername("postgres")
-            .WithPassword(AdminPassword)
-            .Build();
+        try
+        {
+            _postgres = new PostgreSqlBuilder("pgvector/pgvector:pg17")
+                .WithDatabase(Database)
+                .WithUsername("postgres")
+                .WithPassword(AdminPassword)
+                .Build();
 
-        await _postgres.StartAsync();
+            await _postgres.StartAsync();
 
-        await CreateLoginsAsync(_postgres);
+            await CreateLoginsAsync(_postgres);
 
-        AppConnectionString = ConnectionString(_postgres, "saas_app", AppPassword);
-        OwnerConnectionString = ConnectionString(_postgres, "saas_owner", OwnerPassword);
-        AiConnectionString = ConnectionString(_postgres, "saas_ai", AiPassword);
+            AppConnectionString = ConnectionString(_postgres, "saas_app", AppPassword);
+            OwnerConnectionString = ConnectionString(_postgres, "saas_owner", OwnerPassword);
+            AiConnectionString = ConnectionString(_postgres, "saas_ai", AiPassword);
 
-        // The API first: its hosted service applies the migrations the identity
-        // service's seeder waits for.
-        _api = new ApiFactory(AppConnectionString, OwnerConnectionString, () => _auth!);
-        _ = _api.Server;
+            // The API first: its hosted service applies the migrations the identity
+            // service's seeder waits for.
+            _api = new ApiFactory(AppConnectionString, OwnerConnectionString, () => _auth!);
+            _ = _api.Server;
 
-        _auth = new AuthFactory(AppConnectionString, clientId, clientSecret, administratorEmail);
-        _ = _auth.Server;
+            _auth = new AuthFactory(AppConnectionString, clientId, clientSecret, administratorEmail);
+            _ = _auth.Server;
+        }
+        catch
+        {
+            await StopAsync();
+            throw;
+        }
     }
 
     public static async Task StopAsync()

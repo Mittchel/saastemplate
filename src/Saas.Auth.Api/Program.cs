@@ -49,3 +49,10 @@ app.MapControllers();
 app.MapHealthChecks("/health").AllowAnonymous();
 
 app.Run();
+
+// Names this assembly for WebApplicationFactory in the integration tests. It lives in the
+// project namespace, so it does not clash with the other service's top-level-statement Program.
+namespace Saas.Auth.Api
+{
+    public partial class Program;
+}
