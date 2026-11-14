@@ -36,7 +36,15 @@ public sealed class TestCertificates : IDisposable
     {
         var password = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
         var folder = Path.Combine(parent, "saas-test-certs-" + Guid.CreateVersion7().ToString("n"));
-        Directory.CreateDirectory(folder);
+        if (OperatingSystem.IsWindows())
+        {
+            Directory.CreateDirectory(folder);
+        }
+        else
+        {
+            // The temp root is shared on Unix; only this user may list or read the private-key files.
+            Directory.CreateDirectory(folder, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
 
         var certificates = new TestCertificates(folder, password);
         try

@@ -17,6 +17,9 @@ public class TestCertificatesSteps(ScenarioContext scenario)
 {
     private const string OwnCertificatesKey = "TestCertificates.Own";
     private const string FailureParentKey = "TestCertificates.FailureParent";
+    private const string StartupFolderKey = "TestCertificates.StartupFolder";
+    private const string StartupExceptionKey = "TestCertificates.StartupException";
+    private const string StartupFailure = "Simulated host startup failure.";
 
     private static string Folder => TestHosts.CertificateFolder.ShouldNotBeNull();
 
@@ -47,6 +50,28 @@ public class TestCertificatesSteps(ScenarioContext scenario)
         Should.Throw<System.Security.Cryptography.CryptographicException>(() => TestCertificates.Create(parent, "not a distinguished name"));
     }
 
+    [When("the test hosts fail to start after generating their certificates")]
+    public async Task HostStartupFails()
+    {
+        // The same certificate-guarded start TestHosts.StartAsync uses, with a host start that throws.
+        var failure = await Should.ThrowAsync<InvalidOperationException>(() =>
+            TestHosts.StartWithCertificatesAsync(certificates =>
+            {
+                Directory.Exists(certificates.Folder).ShouldBeTrue();
+                scenario[StartupFolderKey] = certificates.Folder;
+                throw new InvalidOperationException(StartupFailure);
+            }));
+        scenario[StartupExceptionKey] = failure;
+    }
+
+    [Then("the startup failure is reported")]
+    public void StartupFailureIsReported() =>
+        scenario.Get<InvalidOperationException>(StartupExceptionKey).Message.ShouldBe(StartupFailure);
+
+    [Then("the certificate folder of that startup no longer exists")]
+    public void StartupFolderIsGone() =>
+        Directory.Exists(scenario.Get<string>(StartupFolderKey)).ShouldBeFalse();
+
     [Then("no certificate folder is left behind")]
     public void NoFolderLeft() =>
         Directory.EnumerateFileSystemEntries(scenario.Get<string>(FailureParentKey)).ShouldBeEmpty();
@@ -63,6 +88,11 @@ public class TestCertificatesSteps(ScenarioContext scenario)
         if (scenario.TryGetValue(FailureParentKey, out string? parent) && Directory.Exists(parent))
         {
             Directory.Delete(parent, recursive: true);
+        }
+
+        if (scenario.TryGetValue(StartupFolderKey, out string? startupFolder) && Directory.Exists(startupFolder))
+        {
+            Directory.Delete(startupFolder, recursive: true);
         }
     }
 

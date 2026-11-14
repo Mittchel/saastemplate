@@ -13,6 +13,11 @@ Feature: Test certificate lifecycle
         When the test certificates are disposed
         Then their folder no longer exists
 
+    Scenario: A failed host startup removes the certificate folder
+        When the test hosts fail to start after generating their certificates
+        Then the startup failure is reported
+        And the certificate folder of that startup no longer exists
+
     Scenario: A failed certificate generation leaves no folder behind
         When generating test certificates fails
         Then no certificate folder is left behind

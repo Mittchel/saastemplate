@@ -74,29 +74,8 @@ public static class TestHosts
     {
         try
         {
-            _certificates = TestCertificates.Create();
-
-            _postgres = new PostgreSqlBuilder("pgvector/pgvector:pg17")
-                .WithDatabase(Database)
-                .WithUsername("postgres")
-                .WithPassword(AdminPassword)
-                .Build();
-
-            await _postgres.StartAsync();
-
-            await CreateLoginsAsync(_postgres);
-
-            AppConnectionString = ConnectionString(_postgres, "saas_app", AppPassword);
-            OwnerConnectionString = ConnectionString(_postgres, "saas_owner", OwnerPassword);
-            AiConnectionString = ConnectionString(_postgres, "saas_ai", AiPassword);
-
-            // The API first: its hosted service applies the migrations the identity
-            // service's seeder waits for.
-            _api = new ApiFactory(AppConnectionString, OwnerConnectionString, () => _auth!);
-            _ = _api.Server;
-
-            _auth = new AuthFactory(AppConnectionString, _certificates, clientId, clientSecret, administratorEmail);
-            _ = _auth.Server;
+            _certificates = await StartWithCertificatesAsync(
+                certificates => StartHostsAsync(certificates, clientId, clientSecret, administratorEmail));
         }
         catch
         {
@@ -111,6 +90,54 @@ public static class TestHosts
 
             throw;
         }
+    }
+
+    /// <summary>
+    /// Generates the certificates and runs <paramref name="start"/> with them. If it throws, the
+    /// certificate folder is deleted before the failure propagates, so a failed startup leaves no keys behind.
+    /// </summary>
+    internal static async Task<TestCertificates> StartWithCertificatesAsync(Func<TestCertificates, Task> start)
+    {
+        var certificates = TestCertificates.Create();
+        try
+        {
+            await start(certificates);
+            return certificates;
+        }
+        catch
+        {
+            certificates.Dispose();
+            throw;
+        }
+    }
+
+    private static async Task StartHostsAsync(
+        TestCertificates certificates,
+        string clientId,
+        string clientSecret,
+        string administratorEmail)
+    {
+        _postgres = new PostgreSqlBuilder("pgvector/pgvector:pg17")
+            .WithDatabase(Database)
+            .WithUsername("postgres")
+            .WithPassword(AdminPassword)
+            .Build();
+
+        await _postgres.StartAsync();
+
+        await CreateLoginsAsync(_postgres);
+
+        AppConnectionString = ConnectionString(_postgres, "saas_app", AppPassword);
+        OwnerConnectionString = ConnectionString(_postgres, "saas_owner", OwnerPassword);
+        AiConnectionString = ConnectionString(_postgres, "saas_ai", AiPassword);
+
+        // The API first: its hosted service applies the migrations the identity
+        // service's seeder waits for.
+        _api = new ApiFactory(AppConnectionString, OwnerConnectionString, () => _auth!);
+        _ = _api.Server;
+
+        _auth = new AuthFactory(AppConnectionString, certificates, clientId, clientSecret, administratorEmail);
+        _ = _auth.Server;
     }
 
     public static async Task StopAsync()
