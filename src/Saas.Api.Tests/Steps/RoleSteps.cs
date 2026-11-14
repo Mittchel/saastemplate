@@ -40,6 +40,9 @@ public class RoleSteps(
         _sharedOrganizationId = organizationId;
         _memberUserId = userId;
 
+        // Clear any row a previous run left behind, so the insert cannot hit the unique index.
+        await database.RemoveMembershipAsync(organizationId, userId);
+
         // Role 0 is Member, which may read runs.
         await database.AddMembershipAsync(organizationId, userId, 0);
 
