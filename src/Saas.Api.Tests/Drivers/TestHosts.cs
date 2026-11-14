@@ -271,6 +271,9 @@ public static class TestHosts
             builder.UseSetting("OpenIddict:Clients:0:ClientId", clientId);
             builder.UseSetting("OpenIddict:Clients:0:ClientSecret", clientSecret);
             builder.UseSetting("Platform:AdministratorEmail", administratorEmail);
+            // All scenarios share the in-process host's one loopback address and so one
+            // per-IP bucket; lift the limit here instead of spoofing client addresses.
+            builder.UseSetting("RateLimiting:AuthPermitLimit", "100000");
         }
     }
 

@@ -29,7 +29,7 @@ builder.Services
         json.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
-builder.Services.AddSaasRateLimiting();
+builder.Services.AddSaasRateLimiting(builder.Configuration);
 builder.Services.AddHealthChecks();
 builder.Services.AddHostedService<Worker>();
 builder.Services.AddHostedService<StaleRunReaper>();

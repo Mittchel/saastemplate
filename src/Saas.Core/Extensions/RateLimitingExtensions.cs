@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Saas.Core.Extensions;
@@ -42,8 +43,21 @@ public static class RateLimitingExtensions
     /// <summary>Ordinary limit for everything else.</summary>
     public const string DefaultPolicy = "default";
 
-    public static IServiceCollection AddSaasRateLimiting(this IServiceCollection services)
+    /// <summary>Configuration key that overrides the identity service's permit limit.</summary>
+    public const string AuthPermitLimitKey = "RateLimiting:AuthPermitLimit";
+
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">
+    /// Read for <see cref="AuthPermitLimitKey"/>. Only the test host sets it:
+    /// every in-process test client shares one loopback address, so one bucket.
+    /// Unset, the production limit of 60 a minute applies.
+    /// </param>
+    public static IServiceCollection AddSaasRateLimiting(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
+        var authPermitLimit = configuration.GetValue(AuthPermitLimitKey, 60);
+
         services.AddRateLimiter(limiter =>
         {
             limiter.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -84,7 +98,7 @@ public static class RateLimitingExtensions
                     ClientKey(context),
                     _ => new SlidingWindowRateLimiterOptions
                     {
-                        PermitLimit = 60,
+                        PermitLimit = authPermitLimit,
                         Window = TimeSpan.FromMinutes(1),
                         SegmentsPerWindow = 6,
                         QueueLimit = 0,
