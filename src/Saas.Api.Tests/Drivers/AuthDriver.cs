@@ -6,7 +6,7 @@ namespace Saas.Api.Tests.Drivers;
 /// <summary>Talks to the identity service's token endpoint.</summary>
 public class AuthDriver(TestSettings settings)
 {
-    private readonly HttpClient _client = new() { BaseAddress = new Uri(settings.AuthBaseUrl) };
+    private readonly HttpClient _client = TestHosts.CreateAuthClient();
 
     public sealed record TokenPair(string AccessToken, string RefreshToken);
 
