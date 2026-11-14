@@ -122,28 +122,51 @@ public class DatabaseDriver(TestSettings settings)
 
     /// <summary>
     /// Counts membership and invitation rows, across every tenant, whose role
-    /// is not 0, 1 or 2. Lifts the forced policy inside a transaction that is
-    /// always rolled back, so nothing changes.
+    /// is not 0, 1 or 2. Read-only: it sets the tenant per organization, as
+    /// the policies require, and changes no schema.
     /// </summary>
     public async Task<int> CountRowsWithUnknownRoleAsync()
     {
         await using var connection = new NpgsqlConnection(settings.PostgresOwner);
         await connection.OpenAsync();
-        await using var transaction = await connection.BeginTransactionAsync();
 
-        var total = 0;
-        foreach (var table in new[] { "Memberships", "Invitations" })
+        var userIds = new List<Guid>();
+        await using (var users = new NpgsqlCommand("SELECT \"Id\" FROM \"Users\"", connection))
+        await using (var reader = await users.ExecuteReaderAsync())
         {
-            await using var lift = new NpgsqlCommand(
-                $"ALTER TABLE \"{table}\" NO FORCE ROW LEVEL SECURITY", connection, transaction);
-            await lift.ExecuteNonQueryAsync();
-
-            await using var count = new NpgsqlCommand(
-                $"SELECT count(*) FROM \"{table}\" WHERE \"Role\" NOT IN (0, 1, 2)", connection, transaction);
-            total += Convert.ToInt32(await count.ExecuteScalarAsync());
+            while (await reader.ReadAsync())
+            {
+                userIds.Add(reader.GetGuid(0));
+            }
         }
 
-        await transaction.RollbackAsync();
+        // Memberships are readable by their own user from any organization, which
+        // enumerates every organization that has at least one member.
+        var organizationIds = new HashSet<Guid>();
+        foreach (var userId in userIds)
+        {
+            await SetTenantAsync(connection, null, userId);
+            await using var memberships = new NpgsqlCommand(
+                "SELECT \"OrganizationId\" FROM \"Memberships\" WHERE \"UserId\" = @user", connection);
+            memberships.Parameters.AddWithValue("user", userId);
+            await using var reader = await memberships.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                organizationIds.Add(reader.GetGuid(0));
+            }
+        }
+
+        var total = 0;
+        foreach (var organizationId in organizationIds)
+        {
+            await SetTenantAsync(connection, organizationId, null);
+            foreach (var table in new[] { "Memberships", "Invitations" })
+            {
+                await using var count = new NpgsqlCommand(
+                    $"SELECT count(*) FROM \"{table}\" WHERE \"Role\" NOT IN (0, 1, 2)", connection);
+                total += Convert.ToInt32(await count.ExecuteScalarAsync());
+            }
+        }
 
         return total;
     }
