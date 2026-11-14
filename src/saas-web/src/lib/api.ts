@@ -30,7 +30,7 @@ export interface OrganizationSummary {
   name: string;
   slug: string;
   isPersonal: boolean;
-  role: "Member" | "Admin" | "Owner";
+  role: "Member" | "Admin" | "Owner" | null;
 }
 
 export interface PlatformOrganization {
@@ -51,7 +51,7 @@ export interface CurrentUser {
   lastName: string;
   avatar: string | null;
   organization: OrganizationSummary;
-  organizationRole: "Member" | "Admin" | "Owner";
+  organizationRole: "Member" | "Admin" | "Owner" | null;
   organizations: OrganizationSummary[];
   permissions: string[];
   /** Operates the platform: can enter any workspace. */

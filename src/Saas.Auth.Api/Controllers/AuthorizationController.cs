@@ -181,11 +181,13 @@ public class AuthorizationController(
             user.Id, targetOrganization.Value, cancellationToken);
 
         // A platform operator may enter any workspace to support it. They enter
-        // as a plain Member: the point is to see what the customer sees, and
-        // granting Owner would let support quietly delete a tenant. The
-        // existence check needs the elevated read, because an operator is not a
-        // member and the ordinary lookup cannot tell "no such tenant" from
-        // "not yours".
+        // with no role and no permissions: permissions come only from a real
+        // membership row, so the API answers 403 to permission-protected
+        // endpoints. The existence check needs the elevated read, because an
+        // operator is not a member and the ordinary lookup cannot tell "no such
+        // tenant" from "not yours".
+        var isOperatorEntry = false;
+
         if (role is null
             && await userManager.IsInRoleAsync(user, PlatformRoles.Administrator)
             && await platformAdminService.OrganizationExistsAsync(
@@ -195,10 +197,10 @@ public class AuthorizationController(
                 "Platform admin {UserId} entered organization {OrganizationId}.",
                 user.Id, targetOrganization);
 
-            role = OrganizationRole.Member;
+            isOperatorEntry = true;
         }
 
-        if (role is null)
+        if (role is null && !isOperatorEntry)
         {
             logger.LogWarning(
                 "User {UserId} attempted to switch into organization {OrganizationId} without membership.",
@@ -212,7 +214,7 @@ public class AuthorizationController(
         }
 
         var principal = await BuildPrincipalAsync(
-            user, targetOrganization.Value, request, cancellationToken, role);
+            user, targetOrganization.Value, request, cancellationToken, role, isOperatorEntry);
 
         return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
@@ -302,13 +304,17 @@ public class AuthorizationController(
         Guid organizationId,
         OpenIddictRequest request,
         CancellationToken cancellationToken,
-        OrganizationRole? knownRole = null)
+        OrganizationRole? knownRole = null,
+        bool skipRoleLookup = false)
     {
         var principal = await signInManager.CreateUserPrincipalAsync(user);
 
+        // No row means no role: an operator who entered a workspace they do
+        // not belong to gets no org_role and no permission claims.
         var role = knownRole
-            ?? await organizationService.GetRoleAsync(user.Id, organizationId, cancellationToken)
-            ?? OrganizationRole.Member;
+            ?? (skipRoleLookup
+                ? null
+                : await organizationService.GetRoleAsync(user.Id, organizationId, cancellationToken));
 
         // Identity maps the name claim to UserName, which here is the email
         // address. Auth.js surfaces this as session.user.name, so set it to the
@@ -327,10 +333,14 @@ public class AuthorizationController(
         }
 
         principal.SetClaim(SaasClaimTypes.OrganizationId, organizationId.ToString());
-        principal.SetClaim(SaasClaimTypes.OrganizationRole, role.ToString());
-        principal.SetClaims(
-            SaasClaimTypes.Permission,
-            OrganizationRolePermissions.For(role).ToImmutableArray());
+
+        if (role is { } membershipRole)
+        {
+            principal.SetClaim(SaasClaimTypes.OrganizationRole, membershipRole.ToString());
+            principal.SetClaims(
+                SaasClaimTypes.Permission,
+                OrganizationRolePermissions.For(membershipRole).ToImmutableArray());
+        }
 
         // offline_access is what makes a refresh token be issued, and the
         // refresh token is also the mechanism for switching organization --

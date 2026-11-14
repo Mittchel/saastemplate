@@ -41,7 +41,7 @@ public static class EntityMapper
             entity.User.Avatar, entity.Role, entity.CreatedDate);
 
     /// <summary>The caller's role lives on the membership, not the organization.</summary>
-    public static OrganizationSummary ToSummary(this OrganizationEntity entity, OrganizationRole role) =>
+    public static OrganizationSummary ToSummary(this OrganizationEntity entity, OrganizationRole? role) =>
         new(entity.Id, entity.Name, entity.Slug, entity.IsPersonal, role);
 
     public static OrganizationDetail ToDetail(this OrganizationEntity entity, int memberCount) =>

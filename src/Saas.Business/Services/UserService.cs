@@ -52,43 +52,42 @@ public class UserService(
         var isPlatformAdmin = tenantContext.IsPlatformAdmin;
         var active = memberships.FirstOrDefault(m => m.OrganizationId == organizationId);
 
-        if (active is null)
+        if (active is not null)
         {
-            // A platform operator who has entered a workspace to support it has
-            // no membership row in it -- that is the point. Without this the
-            // whole app 403s the moment they enter, because every page starts
-            // by calling this method.
-            //
-            // The organization itself is readable: the row-level security
-            // policy admits the row whose id is the active tenant, which it now
-            // is. Everything else stays normal, so they see what a member sees.
-            if (!isPlatformAdmin)
-            {
-                throw FunctionalException.Forbidden(
-                    "You are not a member of the selected organization.",
-                    ErrorScenario.NotAMember);
-            }
-
-            var organization = await context.Organizations
-                .AsNoTracking()
-                .FirstOrDefaultAsync(o => o.Id == organizationId, cancellationToken)
-                ?? throw FunctionalException.NotFound("Organization");
-
-            active = new MembershipEntity
-            {
-                OrganizationId = organizationId,
-                Organization = organization,
-                UserId = userId,
-                // Matches the role the token was issued with; an operator enters
-                // as a member, not an owner.
-                Role = OrganizationRole.Member,
-            };
-
-            // Surfaced in the switcher so they can get back out again.
-            memberships = [.. memberships, active];
+            return BuildResponse(
+                user,
+                active.Organization,
+                active.Role,
+                memberships.Select(m => m.Organization.ToSummary(m.Role)).ToList(),
+                isPlatformAdmin);
         }
 
-        return BuildResponse(user, active, memberships, isPlatformAdmin);
+        // A platform operator who has entered a workspace to support it has no
+        // membership row in it, and so no role and no permissions. Without
+        // this the whole app 403s the moment they enter, because every page
+        // starts by calling this method.
+        //
+        // The organization itself is readable: the row-level security policy
+        // admits the row whose id is the active tenant, which it now is.
+        if (!isPlatformAdmin)
+        {
+            throw FunctionalException.Forbidden(
+                "You are not a member of the selected organization.",
+                ErrorScenario.NotAMember);
+        }
+
+        var entered = await context.Organizations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.Id == organizationId, cancellationToken)
+            ?? throw FunctionalException.NotFound("Organization");
+
+        // Surfaced in the switcher so they can get back out again.
+        var organizations = memberships
+            .Select(m => m.Organization.ToSummary(m.Role))
+            .Append(entered.ToSummary(null))
+            .ToList();
+
+        return BuildResponse(user, entered, null, organizations, isPlatformAdmin);
     }
 
     /// <inheritdoc />
@@ -120,26 +119,21 @@ public class UserService(
 
     private CurrentUserResponse BuildResponse(
         UserEntity user,
-        MembershipEntity active,
-        IReadOnlyCollection<MembershipEntity> memberships,
-        bool isPlatformAdmin)
-    {
-        var organizations = memberships
-            .Select(m => m.Organization.ToSummary(m.Role))
-            .ToList();
-
-        return new CurrentUserResponse(
+        OrganizationEntity organization,
+        OrganizationRole? role,
+        IReadOnlyList<OrganizationSummary> organizations,
+        bool isPlatformAdmin) =>
+        new(
             user.Id,
             user.Email ?? string.Empty,
             string.IsNullOrWhiteSpace(user.FullName) ? user.Email ?? string.Empty : user.FullName,
             user.FirstName,
             user.LastName,
             user.Avatar,
-            active.Organization.ToSummary(active.Role),
-            active.Role,
+            organization.ToSummary(role),
+            role,
             organizations,
-            OrganizationRolePermissions.For(active.Role),
+            role is { } r ? OrganizationRolePermissions.For(r) : [],
             isPlatformAdmin,
             new FeatureFlags(_features.Organizations, _features.PublicSignup));
-    }
 }

@@ -167,6 +167,42 @@ public class PlatformOperatorSteps(
     public void EnteringSucceeds() =>
         _entered.ShouldNotBeNull($"entering returned {_enterStatus}");
 
+    [Then("the access token has no org_role claim")]
+    public void TokenHasNoRole() =>
+        AuthDriver.ReadClaim(_entered.ShouldNotBeNull().AccessToken, "org_role").ShouldBeNull();
+
+    [Then("the access token has no permission claim")]
+    public void TokenHasNoPermission() =>
+        AuthDriver.ReadClaim(_entered.ShouldNotBeNull().AccessToken, "permission").ShouldBeNull();
+
+    [Then("the access token still names the entered workspace and marks me as a platform operator")]
+    public void TokenKeepsOrganizationAndOperatorMarker()
+    {
+        var token = _entered.ShouldNotBeNull().AccessToken;
+
+        AuthDriver.ReadClaim(token, "org_id")
+            .ShouldBe(context.ForeignOrganizationId!.Value.ToString());
+        AuthDriver.ReadClaim(token, "is_platform_admin").ShouldBe("true");
+    }
+
+    [Then("the current user has no organization role and no permissions")]
+    public void CurrentUserHasNoRole()
+    {
+        var root = context.LastJson!.RootElement;
+
+        root.GetProperty("organizationRole").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Null);
+        root.GetProperty("permissions").GetArrayLength().ShouldBe(0);
+    }
+
+    [Then("the current user's organization is the entered workspace")]
+    public void CurrentUserOrganizationIsEntered()
+    {
+        var organization = context.LastJson!.RootElement.GetProperty("organization");
+
+        organization.GetProperty("id").GetGuid().ShouldBe(context.ForeignOrganizationId!.Value);
+        organization.GetProperty("role").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Null);
+    }
+
     [Then("entering is refused")]
     public void EnteringIsRefused() => _entered.ShouldBeNull();
 

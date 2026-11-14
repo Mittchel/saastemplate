@@ -31,7 +31,7 @@ public record CurrentUserResponse(
     string LastName,
     string? Avatar,
     OrganizationSummary Organization,
-    OrganizationRole OrganizationRole,
+    OrganizationRole? OrganizationRole,
     IReadOnlyList<OrganizationSummary> Organizations,
     IReadOnlyList<string> Permissions,
     bool IsPlatformAdmin,
@@ -45,7 +45,7 @@ public record OrganizationSummary(
     string Name,
     string Slug,
     bool IsPersonal,
-    OrganizationRole Role);
+    OrganizationRole? Role);
 
 public record OrganizationDetail(
     Guid Id,
