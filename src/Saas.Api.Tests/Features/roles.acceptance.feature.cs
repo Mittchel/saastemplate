@@ -113,13 +113,13 @@ namespace Saas.Api.Tests.Features
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 1: dev account is HrAdmin and no stored role is out of range")]
-        public async global::System.Threading.Tasks.Task Criterion1DevAccountIsHrAdminAndNoStoredRoleIsOutOfRange()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 1: seeded dev account is HrAdmin and no stored role is out of range")]
+        public async global::System.Threading.Tasks.Task Criterion1SeededDevAccountIsHrAdminAndNoStoredRoleIsOutOfRange()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 1: dev account is HrAdmin and no stored role is out of range", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 1: seeded dev account is HrAdmin and no stored role is out of range", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 4
@@ -133,16 +133,16 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 5
-    await testRunner.GivenAsync("acct \"dev@saas.local\" is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("acceptance: dev is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 6
-    await testRunner.WhenAsync("acct requests \"GET /me\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("acceptance: dev requests GET /me", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 7
-    await testRunner.ThenAsync("the me organizationRole is \"HrAdmin\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("acceptance: organizationRole is \"HrAdmin\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 8
-    await testRunner.AndAsync("no stored membership or invitation role is outside 0 to 2", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("acceptance: no stored membership or invitation role is outside 0, 1 and 2", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -169,28 +169,29 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 11
-    await testRunner.GivenAsync("acct \"member@saas.local\" is a member of the dev organisation with role value 2", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("acceptance: dev is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 12
-    await testRunner.AndAsync("acct \"member@saas.local\" is signed in to the dev organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("acceptance: member is added to dev\'s organisation as \"HrAdmin\" and signed in ther" +
+                        "e", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 13
-    await testRunner.WhenAsync("acct \"member@saas.local\" requests the members list", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("acceptance: member requests the members list", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 14
-    await testRunner.ThenAsync("the status is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("acceptance: the status is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 15
-    await testRunner.WhenAsync("the dev HR admin sets \"member@saas.local\" role to \"Employee\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("acceptance: dev changes member\'s role to \"Employee\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 16
-    await testRunner.AndAsync("acct \"member@saas.local\" requests the members list with the same token", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("acceptance: member requests the members list", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 17
-    await testRunner.ThenAsync("the status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("acceptance: the status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 18
-    await testRunner.AndAsync("the member row is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("acceptance: the membership is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -217,38 +218,45 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 21
-    await testRunner.GivenAsync("acct \"member@saas.local\" is a member of the dev organisation with role value 0", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("acceptance: dev is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 22
-    await testRunner.AndAsync("acct \"member@saas.local\" is signed in to the dev organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("acceptance: member is added to dev\'s organisation as \"Employee\" and signed in the" +
+                        "re", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 23
-    await testRunner.WhenAsync("the dev HR admin sets \"member@saas.local\" role to \"HrAdmin\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("acceptance: member requests the members list", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 24
-    await testRunner.AndAsync("acct \"member@saas.local\" requests the members list with the same token", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("acceptance: the status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 25
-    await testRunner.ThenAsync("the status is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.WhenAsync("acceptance: dev changes member\'s role to \"HrAdmin\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 26
-    await testRunner.AndAsync("the member row is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("acceptance: member requests the members list", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 27
+    await testRunner.ThenAsync("acceptance: the status is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 28
+    await testRunner.AndAsync("acceptance: the membership is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 4: unknown role value gets 403 everywhere")]
-        public async global::System.Threading.Tasks.Task Criterion4UnknownRoleValueGets403Everywhere()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 4: unknown stored role gets 403 everywhere")]
+        public async global::System.Threading.Tasks.Task Criterion4UnknownStoredRoleGets403Everywhere()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 4: unknown role value gets 403 everywhere", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 4: unknown stored role gets 403 everywhere", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 28
+#line 30
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -258,45 +266,46 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 29
-    await testRunner.GivenAsync("acct \"member@saas.local\" is a member of the dev organisation with role value 0", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 30
-    await testRunner.AndAsync("acct \"member@saas.local\" is signed in to the dev organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
 #line 31
-    await testRunner.WhenAsync("the member row raw role is set to 99", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.GivenAsync("acceptance: dev is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 32
-    await testRunner.AndAsync("acct \"member@saas.local\" requests the members list with the same token", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("acceptance: member is added to dev\'s organisation as \"Employee\" and signed in the" +
+                        "re", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 33
-    await testRunner.ThenAsync("the status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.WhenAsync("acceptance: the member\'s raw stored role is set to 99", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 34
-    await testRunner.WhenAsync("acct requests \"GET /runs\" with the same token", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.AndAsync("acceptance: member requests the members list", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 35
-    await testRunner.ThenAsync("the status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("acceptance: the status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 36
-    await testRunner.AndAsync("the member row is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("acceptance: member requests GET /runs", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 37
+    await testRunner.ThenAsync("acceptance: the status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 38
+    await testRunner.AndAsync("acceptance: the membership is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 5: removed membership gets 403")]
-        public async global::System.Threading.Tasks.Task Criterion5RemovedMembershipGets403()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 5: removed membership gets 403 with the old token")]
+        public async global::System.Threading.Tasks.Task Criterion5RemovedMembershipGets403WithTheOldToken()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "4";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 5: removed membership gets 403", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 5: removed membership gets 403 with the old token", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 38
+#line 40
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -306,20 +315,21 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 39
-    await testRunner.GivenAsync("acct \"member@saas.local\" is a member of the dev organisation with role value 0", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 40
-    await testRunner.AndAsync("acct \"member@saas.local\" is signed in to the dev organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
 #line 41
-    await testRunner.WhenAsync("the member row is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.GivenAsync("acceptance: dev is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 42
-    await testRunner.AndAsync("acct \"member@saas.local\" requests the members list with the same token", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("acceptance: member is added to dev\'s organisation as \"HrAdmin\" and signed in ther" +
+                        "e", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 43
-    await testRunner.ThenAsync("the status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.WhenAsync("acceptance: the membership is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 44
+    await testRunner.AndAsync("acceptance: member requests the members list", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 45
+    await testRunner.ThenAsync("acceptance: the status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -327,20 +337,20 @@ namespace Saas.Api.Tests.Features
         
         [global::NUnit.Framework.TestAttribute()]
         [global::NUnit.Framework.DescriptionAttribute("criterion 6: members list is HR admin only")]
-        [global::NUnit.Framework.TestCaseAttribute("0", "403", "5", null)]
-        [global::NUnit.Framework.TestCaseAttribute("1", "403", "6", null)]
-        [global::NUnit.Framework.TestCaseAttribute("2", "200", "7", null)]
-        public async global::System.Threading.Tasks.Task Criterion6MembersListIsHRAdminOnly(string value, string status, string @__pickleIndex, string[] exampleTags)
+        [global::NUnit.Framework.TestCaseAttribute("Employee", "403", "5", null)]
+        [global::NUnit.Framework.TestCaseAttribute("Manager", "403", "6", null)]
+        [global::NUnit.Framework.TestCaseAttribute("HrAdmin", "200", "7", null)]
+        public async global::System.Threading.Tasks.Task Criterion6MembersListIsHRAdminOnly(string role, string status, string @__pickleIndex, string[] exampleTags)
         {
             string[] tagsOfScenario = exampleTags;
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            argumentsOfScenario.Add("value", value);
+            argumentsOfScenario.Add("role", role);
             argumentsOfScenario.Add("status", status);
             string pickleIndex = @__pickleIndex;
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 6: members list is HR admin only", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 45
+#line 47
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -350,20 +360,20 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 46
-    await testRunner.GivenAsync(string.Format("acct \"member@saas.local\" is a member of the dev organisation with role value {0}", value), ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 47
-    await testRunner.AndAsync("acct \"member@saas.local\" is signed in to the dev organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
 #line 48
-    await testRunner.WhenAsync("acct \"member@saas.local\" requests the members list with the same token", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.GivenAsync("acceptance: dev is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 49
-    await testRunner.ThenAsync(string.Format("the status is {0}", status), ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync(string.Format("acceptance: member is added to dev\'s organisation as \"{0}\" and signed in there", role), ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 50
-    await testRunner.AndAsync("the member row is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("acceptance: member requests the members list", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 51
+    await testRunner.ThenAsync(string.Format("acceptance: the status is {0}", status), ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 52
+    await testRunner.AndAsync("acceptance: the membership is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
