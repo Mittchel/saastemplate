@@ -35,6 +35,7 @@ public class InvitationService(
         Guid organizationId,
         CancellationToken cancellationToken = default)
     {
+        RequireActiveOrganization(organizationId);
 
         var invitations = await context.Invitations
             .AsNoTracking()
@@ -52,6 +53,7 @@ public class InvitationService(
         OrganizationRole role,
         CancellationToken cancellationToken = default)
     {
+        RequireActiveOrganization(organizationId);
         RequireOrganizationsEnabled();
 
         var normalizedEmail = email.Trim().ToLowerInvariant();
@@ -121,6 +123,7 @@ public class InvitationService(
         Guid invitationId,
         CancellationToken cancellationToken = default)
     {
+        RequireActiveOrganization(organizationId);
 
         var invitation = await context.Invitations
             .FirstOrDefaultAsync(
@@ -222,6 +225,14 @@ public class InvitationService(
             throw FunctionalException.Forbidden(
                 "Organization management is disabled for this deployment.",
                 ErrorScenario.OrganizationsDisabled);
+        }
+    }
+
+    private void RequireActiveOrganization(Guid organizationId)
+    {
+        if (tenantContext.OrganizationId != organizationId)
+        {
+            throw FunctionalException.NotFound("Organization");
         }
     }
 }

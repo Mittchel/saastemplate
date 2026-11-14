@@ -21,6 +21,7 @@ public class MembershipService(
         Guid organizationId,
         CancellationToken cancellationToken = default)
     {
+        RequireActiveOrganization(organizationId);
 
         var members = await context.Memberships
             .AsNoTracking()
@@ -40,6 +41,7 @@ public class MembershipService(
         OrganizationRole role,
         CancellationToken cancellationToken = default)
     {
+        RequireActiveOrganization(organizationId);
 
         var membership = await context.Memberships
             .Include(m => m.User)
@@ -66,6 +68,7 @@ public class MembershipService(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
+        RequireActiveOrganization(organizationId);
         await RemoveInternalAsync(organizationId, userId, cancellationToken);
     }
 
@@ -127,4 +130,12 @@ public class MembershipService(
             "No authenticated user.",
             ErrorScenario.InvalidCredentials,
             HttpStatusCode.Unauthorized);
+
+    private void RequireActiveOrganization(Guid organizationId)
+    {
+        if (tenantContext.OrganizationId != organizationId)
+        {
+            throw FunctionalException.NotFound("Organization");
+        }
+    }
 }

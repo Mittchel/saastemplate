@@ -74,6 +74,7 @@ public class OrganizationService(
         string name,
         CancellationToken cancellationToken = default)
     {
+        RequireActiveOrganization(organizationId);
 
         var organization = await context.Organizations
             .FirstOrDefaultAsync(o => o.Id == organizationId, cancellationToken)
@@ -93,6 +94,7 @@ public class OrganizationService(
     /// <inheritdoc />
     public async Task DeleteAsync(Guid organizationId, CancellationToken cancellationToken = default)
     {
+        RequireActiveOrganization(organizationId);
 
         var organization = await context.Organizations
             .FirstOrDefaultAsync(o => o.Id == organizationId, cancellationToken)
@@ -175,6 +177,14 @@ public class OrganizationService(
             throw FunctionalException.Forbidden(
                 "Organization management is disabled for this deployment.",
                 ErrorScenario.OrganizationsDisabled);
+        }
+    }
+
+    private void RequireActiveOrganization(Guid organizationId)
+    {
+        if (tenantContext.OrganizationId != organizationId)
+        {
+            throw FunctionalException.NotFound("Organization");
         }
     }
 }
