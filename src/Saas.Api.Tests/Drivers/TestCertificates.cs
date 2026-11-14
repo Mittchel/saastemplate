@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Saas.Api.Tests.Drivers;
@@ -73,7 +74,24 @@ public sealed class TestCertificates : IDisposable
         var request = new CertificateRequest(subject, rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         request.CertificateExtensions.Add(new X509KeyUsageExtension(usage, critical: true));
 
-        using var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
-        File.WriteAllBytes(path, certificate.Export(X509ContentType.Pfx, password));
+        // CreateSelfSigned and Export(Pfx) attach the private key through a temporary keychain on macOS,
+        // which a confined run cannot create. Signing with the key directly and building the PKCS#12
+        // ourselves keeps the key in memory on every platform.
+        using var certificate = request.Create(
+            request.SubjectName,
+            X509SignatureGenerator.CreateForRSA(rsa, RSASignaturePadding.Pkcs1),
+            DateTimeOffset.UtcNow.AddDays(-1),
+            DateTimeOffset.UtcNow.AddYears(1),
+            RandomNumberGenerator.GetBytes(16));
+
+        var encryption = new PbeParameters(PbeEncryptionAlgorithm.Aes256Cbc, HashAlgorithmName.SHA256, 100_000);
+        var contents = new Pkcs12SafeContents();
+        contents.AddCertificate(certificate);
+        contents.AddShroudedKey(rsa, password, encryption);
+
+        var builder = new Pkcs12Builder();
+        builder.AddSafeContentsEncrypted(contents, password, encryption);
+        builder.SealWithMac(password, HashAlgorithmName.SHA256, 100_000);
+        File.WriteAllBytes(path, builder.Encode());
     }
 }
