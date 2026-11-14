@@ -55,7 +55,7 @@ Let's Encrypt on top.
 
 ```
 1. browser ──POST /runs──▶ api
-      authorizes (permission claim), inserts a Run row,
+      authorizes (membership row lookup), inserts a Run row,
       returns { id, threadId }.
 
 2. browser ──GET /api/chat/{id}/stream──▶ web

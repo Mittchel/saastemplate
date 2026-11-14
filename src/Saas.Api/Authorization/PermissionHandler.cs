@@ -27,6 +27,7 @@ public class PermissionHandler(ApplicationDbContext dbContext, ITenantContext te
     private bool _loaded;
     private IReadOnlyList<string> _granted = [];
 
+    /// <inheritdoc />
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
