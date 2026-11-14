@@ -24,8 +24,6 @@ public class RoleSteps(
     TestSettings settings,
     ApiScenarioContext context)
 {
-    // A second caller, so a scenario can act as the development user while api carries the other account's token.
-    private readonly ApiDriver _devApi = new();
     private Guid? _sharedOrganizationId;
     private Guid? _memberUserId;
     private AuthDriver.TokenPair? _devTokens;
@@ -98,7 +96,6 @@ public class RoleSteps(
     {
         _devTokens ??= (await auth.SignInAsync(settings.DevUserEmail, settings.DevUserPassword))
             .ShouldNotBeNull("could not sign in as the development user");
-        _devApi.Authenticate(_devTokens.AccessToken);
         _devOrganizationId = Guid.Parse(AuthDriver.ReadClaim(_devTokens.AccessToken, "org_id")!);
     }
 
@@ -106,7 +103,7 @@ public class RoleSteps(
     public async Task RequestMembersOfAnotherOrganization()
     {
         var foreignId = await ForeignOrganizationIdAsync();
-        var response = await _devApi.GetAsync($"/organizations/{foreignId}/members");
+        var response = await GetAsync(_devTokens!.AccessToken, $"/organizations/{foreignId}/members");
 
         context.LastStatusCode = (int)response.StatusCode;
         _lastBody = await response.Content.ReadAsStringAsync();
@@ -189,6 +186,15 @@ public class RoleSteps(
         permissions.ShouldContain(permission);
     }
 
+    // A GET as the given caller, on a client of its own so the shared drivers keep their accounts.
+    private static async Task<HttpResponseMessage> GetAsync(string accessToken, string path)
+    {
+        using var client = TestHosts.CreateApiClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        return await client.GetAsync(path);
+    }
+
     // A PUT as the given caller, on a client of its own so the shared drivers keep their accounts.
     private static async Task<HttpResponseMessage> PutAsync(string accessToken, string path, object body)
     {
@@ -209,11 +215,9 @@ public class RoleSteps(
         var tokens = _memberPersonalTokens
             ?? (await auth.SignInAsync(settings.MemberUserEmail, settings.MemberUserPassword))
                 .ShouldNotBeNull("could not sign in as the ordinary account");
-        // A caller of its own, so the scenario's shared driver keeps its account.
-        var member = new ApiDriver();
-        member.Authenticate(tokens.AccessToken);
-
-        using var organizations = await member.GetJsonAsync("/organizations");
+        using var listing = await GetAsync(tokens.AccessToken, "/organizations");
+        listing.EnsureSuccessStatusCode();
+        using var organizations = System.Text.Json.JsonDocument.Parse(await listing.Content.ReadAsStringAsync());
 
         _foreignOrganizationId = organizations.RootElement.EnumerateArray()
             .First(o => o.GetProperty("isPersonal").GetBoolean())
