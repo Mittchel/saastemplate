@@ -174,15 +174,10 @@ public class PlatformOperatorSteps(
     public async Task OwnRunIsNoLongerVisible()
     {
         // The point of the scenario. Entering somebody else's workspace is not
-        // additive: the operator trades their own tenant for that one, so a run
-        // they created moments ago and still own is now out of scope.
-        using var document = await api.GetJsonAsync("/runs");
-
-        document.RootElement.EnumerateArray()
-            .Select(r => r.GetProperty("id").GetGuid())
-            .ShouldNotContain(context.RunId!.Value);
-
-        // And the database agrees, asked directly as the runtime role -- so the
+        // additive: the operator trades their own tenant for that one. They
+        // have no membership there, so the API refuses /runs outright (that
+        // status is asserted by the scenario) rather than listing anything.
+        // The database agrees, asked directly as the runtime role -- so the
         // scoping is the row-level security policy, not an EF query filter.
         var entered = await database.CountAsTenantAsync(
             "Runs", context.ForeignOrganizationId!.Value);
