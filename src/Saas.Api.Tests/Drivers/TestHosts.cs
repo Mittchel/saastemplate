@@ -68,7 +68,28 @@ public static class TestHosts
 
     /// <remarks>Each client is owned by its caller; the factory itself is disposed in <see cref="StopAsync"/>.</remarks>
     public static HttpClient CreateAuthClient() =>
-        (_auth ?? throw new InvalidOperationException("Test hosts are not started.")).CreateClient();
+        (_auth ?? throw new InvalidOperationException("Test hosts are not started."))
+            .CreateDefaultClient(new DistinctClientHandler());
+
+    /// <summary>
+    /// The identity service rate limits per client IP (60 token requests a minute), and every in-process
+    /// request has the same address. The suite runs in seconds, so it would exhaust that one bucket and get
+    /// 429 for sign-ins. The service trusts X-Forwarded-For, so each request claims its own address.
+    /// </summary>
+    private sealed class DistinctClientHandler : DelegatingHandler
+    {
+        private static int _next;
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            var n = Interlocked.Increment(ref _next);
+            request.Headers.Remove("X-Forwarded-For");
+            request.Headers.Add("X-Forwarded-For", $"10.{(n >> 16) & 255}.{(n >> 8) & 255}.{n & 255}");
+            return base.SendAsync(request, cancellationToken);
+        }
+    }
 
     public static async Task StartAsync(string clientId, string clientSecret, string administratorEmail)
     {
