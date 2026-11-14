@@ -148,7 +148,8 @@ public class DatabaseDriver(TestSettings settings)
         return total;
     }
 
-    private static int RoleValue(string role) => role switch
+    /// <summary>The stored value of a role name.</summary>
+    public static int RoleValue(string role) => role switch
     {
         "Employee" => 0,
         "Manager" => 1,

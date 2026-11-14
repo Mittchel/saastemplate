@@ -35,7 +35,6 @@ public class InvitationService(
         Guid organizationId,
         CancellationToken cancellationToken = default)
     {
-        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var invitations = await context.Invitations
             .AsNoTracking()
@@ -54,7 +53,6 @@ public class InvitationService(
         CancellationToken cancellationToken = default)
     {
         RequireOrganizationsEnabled();
-        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var normalizedEmail = email.Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(normalizedEmail) || !normalizedEmail.Contains('@'))
@@ -123,7 +121,6 @@ public class InvitationService(
         Guid invitationId,
         CancellationToken cancellationToken = default)
     {
-        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var invitation = await context.Invitations
             .FirstOrDefaultAsync(
@@ -225,23 +222,6 @@ public class InvitationService(
             throw FunctionalException.Forbidden(
                 "Organization management is disabled for this deployment.",
                 ErrorScenario.OrganizationsDisabled);
-        }
-    }
-
-    private async Task RequireHrAdminAsync(
-        Guid organizationId,
-        CancellationToken cancellationToken)
-    {
-        var role = await organizationService.GetRoleAsync(RequireUserId(), organizationId, cancellationToken)
-            ?? throw FunctionalException.Forbidden(
-                "You are not a member of this organization.",
-                ErrorScenario.NotAMember);
-
-        if (role != OrganizationRole.HrAdmin)
-        {
-            throw FunctionalException.Forbidden(
-                "This action requires the HR admin role.",
-                ErrorScenario.InsufficientOrganizationRole);
         }
     }
 }

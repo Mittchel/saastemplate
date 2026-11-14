@@ -80,7 +80,7 @@ public class UserService(
                 Organization = organization,
                 UserId = userId,
                 // Matches the role the token was issued with; an operator enters
-                // as a member, not an owner.
+                // as an Employee, not an HR admin.
                 Role = OrganizationRole.Employee,
             };
 

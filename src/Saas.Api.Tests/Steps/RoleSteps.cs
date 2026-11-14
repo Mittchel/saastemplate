@@ -24,6 +24,8 @@ public class RoleSteps(
     private Guid? _memberUserId;
     private Guid? _organizationId;
     private int _memberStatus;
+    private string? _givenRole;
+    private bool _rawRoleWritten;
 
     [Then("the response field {string} is {string}")]
     public void ResponseFieldIs(string path, string expected)
@@ -53,6 +55,7 @@ public class RoleSteps(
         // A previous aborted run may have left the row behind.
         await database.RemoveMembershipAsync(_memberUserId.Value, _organizationId.Value);
         await database.AddMembershipAsync(_memberUserId.Value, _organizationId.Value, role);
+        _givenRole = role;
 
         var signedIn = await auth.SignInAsync(settings.MemberUserEmail, settings.MemberUserPassword)
             ?? throw new InvalidOperationException("could not sign in as the member account.");
@@ -65,8 +68,11 @@ public class RoleSteps(
     }
 
     [Given("the member's stored role value is {int}")]
-    public Task SetStoredRoleValue(int value) =>
-        database.SetMembershipRoleValueAsync(_memberUserId!.Value, _organizationId!.Value, value);
+    public async Task SetStoredRoleValue(int value)
+    {
+        _rawRoleWritten = true;
+        await database.SetMembershipRoleValueAsync(_memberUserId!.Value, _organizationId!.Value, value);
+    }
 
     [When("I change the member's role to {string}")]
     public async Task ChangeMemberRole(string role)
@@ -98,12 +104,22 @@ public class RoleSteps(
     [Then("the member's response status is {int}")]
     public void MemberStatusIs(int expected) => _memberStatus.ShouldBe(expected);
 
-    /// <summary>Leaves no extra membership, and no role 99, behind.</summary>
+    /// <summary>
+    /// A scenario that wrote a raw role value puts the given role back first, so
+    /// no unknown value survives even if the removal fails; then the membership
+    /// this scenario added is removed, leaving the database as it was found.
+    /// </summary>
     [AfterScenario("MVP-01")]
     public async Task RemoveMemberFromOrganization()
     {
         if (_memberUserId is { } userId && _organizationId is { } organizationId)
         {
+            if (_rawRoleWritten && _givenRole is not null)
+            {
+                await database.SetMembershipRoleValueAsync(
+                    userId, organizationId, DatabaseDriver.RoleValue(_givenRole));
+            }
+
             await database.RemoveMembershipAsync(userId, organizationId);
         }
     }

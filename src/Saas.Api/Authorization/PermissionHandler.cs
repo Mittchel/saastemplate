@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Saas.Core.Tenancy;
 using Saas.Data;
+using Saas.Data.Models;
 using Saas.Data.Models.Constants;
 
 namespace Saas.Api.Authorization;
@@ -34,8 +35,14 @@ public class PermissionHandler(ApplicationDbContext context, ITenantContext tena
             .Select(m => new { m.Role })
             .FirstOrDefaultAsync();
 
-        if (membership is not null &&
-            OrganizationRolePermissions.For(membership.Role).Contains(requirement.Permission))
+        // A platform operator who entered a workspace to support it has no
+        // membership row there by design. They get exactly what an Employee
+        // gets (the role their token and GET /me report), never more.
+        var role = membership?.Role
+            ?? (tenantContext.IsPlatformAdmin ? OrganizationRole.Employee : (OrganizationRole?)null);
+
+        if (role is { } effectiveRole &&
+            OrganizationRolePermissions.For(effectiveRole).Contains(requirement.Permission))
         {
             authorizationContext.Succeed(requirement);
         }

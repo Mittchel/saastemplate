@@ -74,7 +74,6 @@ public class OrganizationService(
         string name,
         CancellationToken cancellationToken = default)
     {
-        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var organization = await context.Organizations
             .FirstOrDefaultAsync(o => o.Id == organizationId, cancellationToken)
@@ -94,7 +93,6 @@ public class OrganizationService(
     /// <inheritdoc />
     public async Task DeleteAsync(Guid organizationId, CancellationToken cancellationToken = default)
     {
-        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var organization = await context.Organizations
             .FirstOrDefaultAsync(o => o.Id == organizationId, cancellationToken)
@@ -177,23 +175,6 @@ public class OrganizationService(
             throw FunctionalException.Forbidden(
                 "Organization management is disabled for this deployment.",
                 ErrorScenario.OrganizationsDisabled);
-        }
-    }
-
-    private async Task RequireHrAdminAsync(
-        Guid organizationId,
-        CancellationToken cancellationToken)
-    {
-        var role = await GetRoleAsync(RequireUserId(), organizationId, cancellationToken)
-            ?? throw FunctionalException.Forbidden(
-                "You are not a member of this organization.",
-                ErrorScenario.NotAMember);
-
-        if (role != OrganizationRole.HrAdmin)
-        {
-            throw FunctionalException.Forbidden(
-                "This action requires the HR admin role.",
-                ErrorScenario.InsufficientOrganizationRole);
         }
     }
 }
