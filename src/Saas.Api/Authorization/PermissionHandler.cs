@@ -1,34 +1,57 @@
 using Microsoft.AspNetCore.Authorization;
-using Saas.Core.Constants;
+using Microsoft.EntityFrameworkCore;
+using Saas.Core.Tenancy;
+using Saas.Data;
+using Saas.Data.Models;
+using Saas.Data.Models.Constants;
 
 namespace Saas.Api.Authorization;
 
 /// <summary>
-/// Satisfies a <see cref="PermissionRequirement"/> from the token's
-/// <c>permission</c> claims.
+/// Satisfies a <see cref="PermissionRequirement"/> from the caller's current
+/// membership row in the active organization.
 /// </summary>
 /// <remarks>
-/// Controllers check permissions, never roles. The identity service expands the
-/// caller's organization role into permission claims when it mints the token,
-/// which keeps the two authorization models from drifting apart and means a
-/// role change takes effect on the next token rather than needing a lookup on
-/// every request.
+/// Controllers check permissions, never roles. The role is looked up on every
+/// request, so a role change or a removed membership takes effect immediately
+/// rather than when the access token (up to 30 minutes old) is replaced. The
+/// token's <c>permission</c> claims are for the UI only and are never read here,
+/// nor is the platform-admin claim: an operator who entered a workspace they
+/// are not a member of has no row and is refused. The lookup goes through the
+/// scoped context, so row-level security applies as usual.
 /// </remarks>
-public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
+public class PermissionHandler(ApplicationDbContext dbContext, ITenantContext tenant)
+    : AuthorizationHandler<PermissionRequirement>
 {
-    protected override Task HandleRequirementAsync(
+    // One request can evaluate several requirements; read the row once.
+    private bool _loaded;
+    private IReadOnlyList<string> _granted = [];
+
+    /// <inheritdoc />
+    protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
-        var granted = context.User.Claims.Any(claim =>
-            claim.Type == SaasClaimTypes.Permission &&
-            string.Equals(claim.Value, requirement.Permission, StringComparison.Ordinal));
+        if (!_loaded)
+        {
+            if (tenant.UserId is { } userId && tenant.OrganizationId is { } organizationId)
+            {
+                var role = await dbContext.Memberships
+                    .AsNoTracking()
+                    .Where(m => m.UserId == userId && m.OrganizationId == organizationId)
+                    .Select(m => (OrganizationRole?)m.Role)
+                    .FirstOrDefaultAsync();
 
-        if (granted)
+                // No row means no permissions, with no fallback role.
+                _granted = role is { } found ? OrganizationRolePermissions.For(found) : [];
+            }
+
+            _loaded = true;
+        }
+
+        if (_granted.Contains(requirement.Permission, StringComparer.Ordinal))
         {
             context.Succeed(requirement);
         }
-
-        return Task.CompletedTask;
     }
 }

@@ -66,6 +66,70 @@ public class DatabaseDriver(TestSettings settings)
             : (false, false);
     }
 
+    /// <summary>
+    /// Runs a statement as the table owner with the tenant set. Row-level
+    /// security is forced on Memberships even for the owner, so every write
+    /// has to go through here for its WITH CHECK to pass.
+    /// </summary>
+    public async Task<int> ExecuteAsTenantAsync(
+        Guid organizationId,
+        string sql,
+        IReadOnlyDictionary<string, object> parameters,
+        Guid? userId = null)
+    {
+        await using var connection = new NpgsqlConnection(settings.PostgresOwner);
+        await connection.OpenAsync();
+
+        await SetTenantAsync(connection, organizationId, userId);
+
+        await using var command = new NpgsqlCommand(sql, connection);
+
+        foreach (var (name, value) in parameters)
+        {
+            command.Parameters.AddWithValue(name, value);
+        }
+
+        return await command.ExecuteNonQueryAsync();
+    }
+
+    /// <summary>Adds a membership with a raw integer role, which may be undefined.</summary>
+    public Task<int> AddMembershipAsync(Guid organizationId, Guid userId, int role) =>
+        ExecuteAsTenantAsync(
+            organizationId,
+            "INSERT INTO \"Memberships\" (\"Id\", \"OrganizationId\", \"UserId\", \"Role\", \"CreatedDate\") " +
+            "VALUES (@id, @organization, @user, @role, now())",
+            new Dictionary<string, object>
+            {
+                ["id"] = Guid.CreateVersion7(),
+                ["organization"] = organizationId,
+                ["user"] = userId,
+                ["role"] = role,
+            });
+
+    /// <summary>Sets a membership's raw integer role.</summary>
+    public Task<int> SetMembershipRoleAsync(Guid organizationId, Guid userId, int role) =>
+        ExecuteAsTenantAsync(
+            organizationId,
+            "UPDATE \"Memberships\" SET \"Role\" = @role, \"ModifiedDate\" = now() " +
+            "WHERE \"OrganizationId\" = @organization AND \"UserId\" = @user",
+            new Dictionary<string, object>
+            {
+                ["organization"] = organizationId,
+                ["user"] = userId,
+                ["role"] = role,
+            });
+
+    /// <summary>Removes a membership row.</summary>
+    public Task<int> RemoveMembershipAsync(Guid organizationId, Guid userId) =>
+        ExecuteAsTenantAsync(
+            organizationId,
+            "DELETE FROM \"Memberships\" WHERE \"OrganizationId\" = @organization AND \"UserId\" = @user",
+            new Dictionary<string, object>
+            {
+                ["organization"] = organizationId,
+                ["user"] = userId,
+            });
+
     private static async Task SetTenantAsync(
         NpgsqlConnection connection,
         Guid? organizationId,
