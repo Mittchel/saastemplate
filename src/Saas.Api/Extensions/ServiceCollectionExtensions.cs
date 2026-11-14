@@ -63,7 +63,7 @@ public static class ServiceCollectionExtensions
 
                     // OpenIddict scopes tokens by resource rather than a single
                     // audience; authorization is enforced per request from the membership row
-                    // below, which is the check that actually matters here.
+                    // by PermissionHandler, which is the check that actually matters here.
                     ValidateAudience = false,
 
                     ValidateLifetime = true,
