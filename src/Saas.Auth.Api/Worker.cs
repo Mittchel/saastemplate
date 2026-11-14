@@ -34,12 +34,15 @@ public class Worker(
 
         await WaitForSchemaAsync(scope.ServiceProvider, cancellationToken);
         await SeedClientsAsync(scope.ServiceProvider, cancellationToken);
-        await SeedPlatformAdministratorAsync(scope.ServiceProvider);
 
         if (environment.IsDevelopment())
         {
             await SeedDevelopmentUserAsync(scope.ServiceProvider, cancellationToken);
         }
+
+        // After the development users: on a fresh database the configured operator is often one of them, and the
+        // grant only finds accounts that already exist.
+        await SeedPlatformAdministratorAsync(scope.ServiceProvider);
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
