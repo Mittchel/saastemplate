@@ -27,6 +27,15 @@ public static class Permissions
     public const string MemberWrite = "member.write";
     public const string MemberRemove = "member.remove";
 
+    public const string TeamRead = "team.read";
+    public const string TeamWrite = "team.write";
+    public const string EmployeeRead = "employee.read";
+    public const string EmployeeWrite = "employee.write";
+    public const string EmployeeImport = "employee.import";
+    public const string InvitationManage = "invitation.manage";
+    public const string OrgChartRead = "orgchart.read";
+    public const string ProfileOwn = "profile.own";
+
 
     public const string RunCreate = "run.create";
     public const string RunRead = "run.read";

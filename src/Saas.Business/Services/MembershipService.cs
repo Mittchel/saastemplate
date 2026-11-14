@@ -22,14 +22,13 @@ public class MembershipService(
         Guid organizationId,
         CancellationToken cancellationToken = default)
     {
-        await RequireRoleAsync(organizationId, OrganizationRole.Member, cancellationToken);
+        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var members = await context.Memberships
             .AsNoTracking()
             .Include(m => m.User)
             .Where(m => m.OrganizationId == organizationId)
-            .OrderByDescending(m => m.Role)
-            .ThenBy(m => m.User.FullName)
+            .OrderBy(m => m.User.FullName)
             .ToListAsync(cancellationToken);
 
         return members.Select(m => m.ToSummary()).ToList();
@@ -42,7 +41,7 @@ public class MembershipService(
         OrganizationRole role,
         CancellationToken cancellationToken = default)
     {
-        await RequireRoleAsync(organizationId, OrganizationRole.Admin, cancellationToken);
+        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var membership = await context.Memberships
             .Include(m => m.User)
@@ -51,10 +50,10 @@ public class MembershipService(
                 cancellationToken)
             ?? throw FunctionalException.NotFound("Membership");
 
-        // Demoting the last owner would leave the organization unadministrable.
-        if (membership.Role == OrganizationRole.Owner && role != OrganizationRole.Owner)
+        // Demoting the last HR admin would leave the organization unadministrable.
+        if (membership.Role == OrganizationRole.HrAdmin && role != OrganizationRole.HrAdmin)
         {
-            await RequireAnotherOwnerAsync(organizationId, userId, cancellationToken);
+            await RequireAnotherHrAdminAsync(organizationId, userId, cancellationToken);
         }
 
         membership.Role = role;
@@ -69,7 +68,7 @@ public class MembershipService(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        await RequireRoleAsync(organizationId, OrganizationRole.Admin, cancellationToken);
+        await RequireHrAdminAsync(organizationId, cancellationToken);
         await RemoveInternalAsync(organizationId, userId, cancellationToken);
     }
 
@@ -98,30 +97,30 @@ public class MembershipService(
                 ErrorScenario.CannotLeavePersonalOrganization);
         }
 
-        if (membership.Role == OrganizationRole.Owner)
+        if (membership.Role == OrganizationRole.HrAdmin)
         {
-            await RequireAnotherOwnerAsync(organizationId, userId, cancellationToken);
+            await RequireAnotherHrAdminAsync(organizationId, userId, cancellationToken);
         }
 
         context.Memberships.Remove(membership);
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task RequireAnotherOwnerAsync(
+    private async Task RequireAnotherHrAdminAsync(
         Guid organizationId,
         Guid excludingUserId,
         CancellationToken cancellationToken)
     {
-        var anotherOwnerExists = await context.Memberships.AnyAsync(
+        var anotherHrAdminExists = await context.Memberships.AnyAsync(
             m => m.OrganizationId == organizationId
                  && m.UserId != excludingUserId
-                 && m.Role == OrganizationRole.Owner,
+                 && m.Role == OrganizationRole.HrAdmin,
             cancellationToken);
 
-        if (!anotherOwnerExists)
+        if (!anotherHrAdminExists)
         {
             throw FunctionalException.Conflict(
-                "The last owner of an organization cannot be removed or demoted.",
+                "The last HR admin of an organization cannot be removed or demoted.",
                 ErrorScenario.LastOwnerCannotBeRemoved);
         }
     }
@@ -132,9 +131,8 @@ public class MembershipService(
             ErrorScenario.InvalidCredentials,
             HttpStatusCode.Unauthorized);
 
-    private async Task RequireRoleAsync(
+    private async Task RequireHrAdminAsync(
         Guid organizationId,
-        OrganizationRole minimumRole,
         CancellationToken cancellationToken)
     {
         var role = await organizationService.GetRoleAsync(RequireUserId(), organizationId, cancellationToken)
@@ -142,10 +140,10 @@ public class MembershipService(
                 "You are not a member of this organization.",
                 ErrorScenario.NotAMember);
 
-        if (role < minimumRole)
+        if (role != OrganizationRole.HrAdmin)
         {
             throw FunctionalException.Forbidden(
-                $"This action requires the {minimumRole} role.",
+                "This action requires the HR admin role.",
                 ErrorScenario.InsufficientOrganizationRole);
         }
     }

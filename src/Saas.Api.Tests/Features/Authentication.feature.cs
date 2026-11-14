@@ -27,8 +27,8 @@ namespace Saas.Api.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Authentication", "    Signing in exchanges credentials for a token that carries the tenant, so\r\n   " +
-                " every downstream service resolves the organization without a lookup.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Authentication", "    Signing in exchanges credentials for a token that carries the tenant, so\n    " +
+                "every downstream service resolves the organization without a lookup.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "Authentication.feature"
 #line hidden
@@ -139,7 +139,7 @@ namespace Saas.Api.Tests.Features
         await testRunner.AndAsync("the access token carries an organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 9
-        await testRunner.AndAsync("the access token carries the role \"Owner\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+        await testRunner.AndAsync("the access token carries the role \"HrAdmin\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 10
         await testRunner.AndAsync("the access token carries the permission \"run.create\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");

@@ -6,7 +6,7 @@ Feature: Authentication
         When I sign in as the development user
         Then the sign in succeeds
         And the access token carries an organization
-        And the access token carries the role "Owner"
+        And the access token carries the role "HrAdmin"
         And the access token carries the permission "run.create"
 
     Scenario: Signing in with the wrong password is refused

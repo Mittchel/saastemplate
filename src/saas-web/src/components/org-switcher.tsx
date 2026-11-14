@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import type { OrganizationSummary } from "@/lib/api";
+import { roleLabel } from "@/lib/roles";
 
 /**
  * Replaces sidebar-07's TeamSwitcher, which shipped with a hard-coded `teams`
@@ -73,7 +74,7 @@ export function OrgSwitcher({
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{active.name}</span>
               <span className="truncate text-xs text-muted-foreground">
-                {active.isPersonal ? "Personal workspace" : active.role}
+                {active.isPersonal ? "Personal workspace" : roleLabel(active.role)}
               </span>
             </div>
             <ChevronsUpDownIcon className="ml-auto size-4" />

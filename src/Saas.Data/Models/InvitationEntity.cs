@@ -9,7 +9,7 @@ public class InvitationEntity : BaseEntity, ITenantScoped
 
     public string Email { get; set; } = string.Empty;
 
-    public OrganizationRole Role { get; set; } = OrganizationRole.Member;
+    public OrganizationRole Role { get; set; } = OrganizationRole.Employee;
 
     /// <summary>Opaque single-use token sent in the invitation link.</summary>
     public string Token { get; set; } = string.Empty;

@@ -65,7 +65,7 @@ public class OrganizationService(
         var userId = RequireUserId();
         var organization = await provisioningService.CreateOrganizationAsync(userId, name, cancellationToken);
 
-        return organization.ToSummary(OrganizationRole.Owner);
+        return organization.ToSummary(OrganizationRole.HrAdmin);
     }
 
     /// <inheritdoc />
@@ -74,7 +74,7 @@ public class OrganizationService(
         string name,
         CancellationToken cancellationToken = default)
     {
-        await RequireRoleAsync(organizationId, OrganizationRole.Admin, cancellationToken);
+        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var organization = await context.Organizations
             .FirstOrDefaultAsync(o => o.Id == organizationId, cancellationToken)
@@ -94,7 +94,7 @@ public class OrganizationService(
     /// <inheritdoc />
     public async Task DeleteAsync(Guid organizationId, CancellationToken cancellationToken = default)
     {
-        await RequireRoleAsync(organizationId, OrganizationRole.Owner, cancellationToken);
+        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var organization = await context.Organizations
             .FirstOrDefaultAsync(o => o.Id == organizationId, cancellationToken)
@@ -180,9 +180,8 @@ public class OrganizationService(
         }
     }
 
-    private async Task RequireRoleAsync(
+    private async Task RequireHrAdminAsync(
         Guid organizationId,
-        OrganizationRole minimumRole,
         CancellationToken cancellationToken)
     {
         var role = await GetRoleAsync(RequireUserId(), organizationId, cancellationToken)
@@ -190,10 +189,10 @@ public class OrganizationService(
                 "You are not a member of this organization.",
                 ErrorScenario.NotAMember);
 
-        if (role < minimumRole)
+        if (role != OrganizationRole.HrAdmin)
         {
             throw FunctionalException.Forbidden(
-                $"This action requires the {minimumRole} role.",
+                "This action requires the HR admin role.",
                 ErrorScenario.InsufficientOrganizationRole);
         }
     }

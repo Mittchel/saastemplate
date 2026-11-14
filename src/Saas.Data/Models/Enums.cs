@@ -1,11 +1,11 @@
 namespace Saas.Data.Models;
 
-/// <summary>A member's role within a single organization.</summary>
+/// <summary>A member's role within a single organization. The roles are not a hierarchy; never compare them by ordinal.</summary>
 public enum OrganizationRole
 {
-    Member = 0,
-    Admin = 1,
-    Owner = 2,
+    Employee = 0,
+    Manager = 1,
+    HrAdmin = 2,
 }
 
 

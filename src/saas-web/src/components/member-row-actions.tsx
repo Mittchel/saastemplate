@@ -13,8 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { roleLabel } from "@/lib/roles";
 
-const ROLES = ["Member", "Admin", "Owner"] as const;
+const ROLES = ["Employee", "Manager", "HrAdmin"] as const;
 
 export function MemberRowActions({
   userId,
@@ -37,7 +38,7 @@ export function MemberRowActions({
   // Without the permission the row stays informational, matching what the API
   // would allow anyway.
   if (!canManage) {
-    return <span className="text-sm">{role}</span>;
+    return <span className="text-sm">{roleLabel(role)}</span>;
   }
 
   // Base UI emits null when a selection is cleared; there is no "no role", so
@@ -59,7 +60,7 @@ export function MemberRowActions({
         setCurrent(previous);
         toast.error(result.error);
       } else {
-        toast.success(`${fullName || email} is now ${next}.`);
+        toast.success(`${fullName || email} is now ${roleLabel(next)}.`);
       }
     });
   }
@@ -80,12 +81,12 @@ export function MemberRowActions({
     <div className="flex items-center justify-end gap-2">
       <Select value={current} onValueChange={change} disabled={pending}>
         <SelectTrigger className="w-32" aria-label={`Role for ${email}`}>
-          <SelectValue />
+          <SelectValue>{roleLabel(current)}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {ROLES.map((option) => (
             <SelectItem key={option} value={option}>
-              {option}
+              {roleLabel(option)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -96,7 +97,7 @@ export function MemberRowActions({
         size="icon"
         onClick={remove}
         // Leaving is a different operation with different rules (it is allowed
-        // for yourself, and the API guards the last owner), so it belongs on the
+        // for yourself, and the API guards the last HR admin), so it belongs on the
         // organization page rather than disguised as a removal here.
         disabled={pending || isSelf}
         title={isSelf ? "Leave from the workspace settings instead" : "Remove member"}

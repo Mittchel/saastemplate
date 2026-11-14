@@ -16,7 +16,7 @@ export async function inviteAction(
   formData: FormData,
 ): Promise<InviteState> {
   const email = String(formData.get("email") ?? "").trim();
-  const role = String(formData.get("role") ?? "Member");
+  const role = String(formData.get("role") ?? "Employee");
 
   if (!email) {
     return { error: "Enter an email address." };

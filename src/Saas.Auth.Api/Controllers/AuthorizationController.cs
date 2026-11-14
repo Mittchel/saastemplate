@@ -181,8 +181,8 @@ public class AuthorizationController(
             user.Id, targetOrganization.Value, cancellationToken);
 
         // A platform operator may enter any workspace to support it. They enter
-        // as a plain Member: the point is to see what the customer sees, and
-        // granting Owner would let support quietly delete a tenant. The
+        // as a plain Employee: the point is to see what the customer sees, and
+        // granting HrAdmin would let support quietly delete a tenant. The
         // existence check needs the elevated read, because an operator is not a
         // member and the ordinary lookup cannot tell "no such tenant" from
         // "not yours".
@@ -195,7 +195,7 @@ public class AuthorizationController(
                 "Platform admin {UserId} entered organization {OrganizationId}.",
                 user.Id, targetOrganization);
 
-            role = OrganizationRole.Member;
+            role = OrganizationRole.Employee;
         }
 
         if (role is null)
@@ -307,8 +307,7 @@ public class AuthorizationController(
         var principal = await signInManager.CreateUserPrincipalAsync(user);
 
         var role = knownRole
-            ?? await organizationService.GetRoleAsync(user.Id, organizationId, cancellationToken)
-            ?? OrganizationRole.Member;
+            ?? await organizationService.GetRoleAsync(user.Id, organizationId, cancellationToken);
 
         // Identity maps the name claim to UserName, which here is the email
         // address. Auth.js surfaces this as session.user.name, so set it to the
@@ -327,10 +326,18 @@ public class AuthorizationController(
         }
 
         principal.SetClaim(SaasClaimTypes.OrganizationId, organizationId.ToString());
-        principal.SetClaim(SaasClaimTypes.OrganizationRole, role.ToString());
+        // The UI-only claims. A caller without a record gets no role and no
+        // permissions; the API never reads these for authorization.
+        if (role is { } knownOrganizationRole)
+        {
+            principal.SetClaim(SaasClaimTypes.OrganizationRole, knownOrganizationRole.ToString());
+        }
+
         principal.SetClaims(
             SaasClaimTypes.Permission,
-            OrganizationRolePermissions.For(role).ToImmutableArray());
+            role is { } permissionRole
+                ? OrganizationRolePermissions.For(permissionRole).ToImmutableArray()
+                : ImmutableArray<string>.Empty);
 
         // offline_access is what makes a refresh token be issued, and the
         // refresh token is also the mechanism for switching organization --

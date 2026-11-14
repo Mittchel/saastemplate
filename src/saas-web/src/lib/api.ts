@@ -30,7 +30,7 @@ export interface OrganizationSummary {
   name: string;
   slug: string;
   isPersonal: boolean;
-  role: "Member" | "Admin" | "Owner";
+  role: "Employee" | "Manager" | "HrAdmin";
 }
 
 export interface PlatformOrganization {
@@ -51,7 +51,7 @@ export interface CurrentUser {
   lastName: string;
   avatar: string | null;
   organization: OrganizationSummary;
-  organizationRole: "Member" | "Admin" | "Owner";
+  organizationRole: "Employee" | "Manager" | "HrAdmin";
   organizations: OrganizationSummary[];
   permissions: string[];
   /** Operates the platform: can enter any workspace. */
@@ -64,14 +64,14 @@ export interface MemberSummary {
   email: string;
   fullName: string;
   avatar: string | null;
-  role: "Member" | "Admin" | "Owner";
+  role: "Employee" | "Manager" | "HrAdmin";
   joinedAt: string;
 }
 
 export interface InvitationSummary {
   id: string;
   email: string;
-  role: "Member" | "Admin" | "Owner";
+  role: "Employee" | "Manager" | "HrAdmin";
   expiresAt: string;
   acceptedAt: string | null;
   isPending: boolean;

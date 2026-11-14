@@ -21,7 +21,7 @@ export async function changeRoleAction(
     return {};
   } catch (error) {
     if (error instanceof ApiRequestError) {
-      // The API refuses to demote the last owner; surfacing its reason is more
+      // The API refuses to demote the last HR admin; surfacing its reason is more
       // useful than a generic failure.
       return { error: describeError(error.body, "Could not change the role.") };
     }

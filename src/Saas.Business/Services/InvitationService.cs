@@ -35,7 +35,7 @@ public class InvitationService(
         Guid organizationId,
         CancellationToken cancellationToken = default)
     {
-        await RequireRoleAsync(organizationId, OrganizationRole.Admin, cancellationToken);
+        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var invitations = await context.Invitations
             .AsNoTracking()
@@ -54,7 +54,7 @@ public class InvitationService(
         CancellationToken cancellationToken = default)
     {
         RequireOrganizationsEnabled();
-        await RequireRoleAsync(organizationId, OrganizationRole.Admin, cancellationToken);
+        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var normalizedEmail = email.Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(normalizedEmail) || !normalizedEmail.Contains('@'))
@@ -123,7 +123,7 @@ public class InvitationService(
         Guid invitationId,
         CancellationToken cancellationToken = default)
     {
-        await RequireRoleAsync(organizationId, OrganizationRole.Admin, cancellationToken);
+        await RequireHrAdminAsync(organizationId, cancellationToken);
 
         var invitation = await context.Invitations
             .FirstOrDefaultAsync(
@@ -228,9 +228,8 @@ public class InvitationService(
         }
     }
 
-    private async Task RequireRoleAsync(
+    private async Task RequireHrAdminAsync(
         Guid organizationId,
-        OrganizationRole minimumRole,
         CancellationToken cancellationToken)
     {
         var role = await organizationService.GetRoleAsync(RequireUserId(), organizationId, cancellationToken)
@@ -238,10 +237,10 @@ public class InvitationService(
                 "You are not a member of this organization.",
                 ErrorScenario.NotAMember);
 
-        if (role < minimumRole)
+        if (role != OrganizationRole.HrAdmin)
         {
             throw FunctionalException.Forbidden(
-                $"This action requires the {minimumRole} role.",
+                "This action requires the HR admin role.",
                 ErrorScenario.InsufficientOrganizationRole);
         }
     }

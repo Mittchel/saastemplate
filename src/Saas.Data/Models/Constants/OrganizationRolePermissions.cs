@@ -12,25 +12,23 @@ public static class OrganizationRolePermissions
 {
     public static IReadOnlyList<string> For(OrganizationRole role) => role switch
     {
-        OrganizationRole.Owner =>
+        OrganizationRole.HrAdmin =>
         [
             Permissions.OrganizationRead, Permissions.OrganizationWrite, Permissions.OrganizationDelete,
             Permissions.MemberRead, Permissions.MemberInvite, Permissions.MemberWrite, Permissions.MemberRemove,
-            Permissions.RunCreate, Permissions.RunRead,
             Permissions.UserRead,
-        ],
-        OrganizationRole.Admin =>
-        [
-            Permissions.OrganizationRead, Permissions.OrganizationWrite,
-            Permissions.MemberRead, Permissions.MemberInvite, Permissions.MemberWrite, Permissions.MemberRemove,
             Permissions.RunCreate, Permissions.RunRead,
-            Permissions.UserRead,
+            Permissions.TeamRead, Permissions.TeamWrite,
+            Permissions.EmployeeRead, Permissions.EmployeeWrite, Permissions.EmployeeImport,
+            Permissions.InvitationManage, Permissions.OrgChartRead, Permissions.ProfileOwn,
         ],
-        _ =>
+        OrganizationRole.Manager or OrganizationRole.Employee =>
         [
             Permissions.OrganizationRead,
-            Permissions.MemberRead,
             Permissions.RunCreate, Permissions.RunRead,
+            Permissions.TeamRead, Permissions.EmployeeRead,
+            Permissions.ProfileOwn,
         ],
+        _ => [],
     };
 }

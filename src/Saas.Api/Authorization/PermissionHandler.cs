@@ -1,34 +1,43 @@
 using Microsoft.AspNetCore.Authorization;
-using Saas.Core.Constants;
+using Microsoft.EntityFrameworkCore;
+using Saas.Core.Tenancy;
+using Saas.Data;
+using Saas.Data.Models.Constants;
 
 namespace Saas.Api.Authorization;
 
 /// <summary>
-/// Satisfies a <see cref="PermissionRequirement"/> from the token's
-/// <c>permission</c> claims.
+/// Satisfies a <see cref="PermissionRequirement"/> from the caller's current
+/// membership (employee record) in the active organization.
 /// </summary>
 /// <remarks>
-/// Controllers check permissions, never roles. The identity service expands the
-/// caller's organization role into permission claims when it mints the token,
-/// which keeps the two authorization models from drifting apart and means a
-/// role change takes effect on the next token rather than needing a lookup on
-/// every request.
+/// Controllers check permissions, never roles. The role is read from the
+/// database on every request through the normal, RLS-scoped context, so a role
+/// change or removal applies on the next request. The <c>permission</c> token
+/// claims are for the UI only and are never read here.
 /// </remarks>
-public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
+public class PermissionHandler(ApplicationDbContext context, ITenantContext tenantContext)
+    : AuthorizationHandler<PermissionRequirement>
 {
-    protected override Task HandleRequirementAsync(
-        AuthorizationHandlerContext context,
+    protected override async Task HandleRequirementAsync(
+        AuthorizationHandlerContext authorizationContext,
         PermissionRequirement requirement)
     {
-        var granted = context.User.Claims.Any(claim =>
-            claim.Type == SaasClaimTypes.Permission &&
-            string.Equals(claim.Value, requirement.Permission, StringComparison.Ordinal));
-
-        if (granted)
+        if (tenantContext.UserId is not { } userId || tenantContext.OrganizationId is not { } organizationId)
         {
-            context.Succeed(requirement);
+            return;
         }
 
-        return Task.CompletedTask;
+        var membership = await context.Memberships
+            .AsNoTracking()
+            .Where(m => m.UserId == userId && m.OrganizationId == organizationId)
+            .Select(m => new { m.Role })
+            .FirstOrDefaultAsync();
+
+        if (membership is not null &&
+            OrganizationRolePermissions.For(membership.Role).Contains(requirement.Permission))
+        {
+            authorizationContext.Succeed(requirement);
+        }
     }
 }

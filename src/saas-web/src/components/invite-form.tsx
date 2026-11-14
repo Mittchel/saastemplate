@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { roleLabel } from "@/lib/roles";
 
 const INITIAL: InviteState = {};
 
@@ -43,14 +44,14 @@ export function InviteForm() {
 
           <div className="space-y-1.5">
             <Label htmlFor="role">Role</Label>
-            <Select name="role" defaultValue="Member">
+            <Select name="role" defaultValue="Employee">
               <SelectTrigger id="role" className="sm:w-36">
-                <SelectValue />
+                <SelectValue>{(value: string) => roleLabel(value)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Member">Member</SelectItem>
-                <SelectItem value="Admin">Admin</SelectItem>
-                <SelectItem value="Owner">Owner</SelectItem>
+                <SelectItem value="Employee">Employee</SelectItem>
+                <SelectItem value="Manager">Manager</SelectItem>
+                <SelectItem value="HrAdmin">HR admin</SelectItem>
               </SelectContent>
             </Select>
           </div>

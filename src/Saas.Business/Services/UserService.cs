@@ -81,7 +81,7 @@ public class UserService(
                 UserId = userId,
                 // Matches the role the token was issued with; an operator enters
                 // as a member, not an owner.
-                Role = OrganizationRole.Member,
+                Role = OrganizationRole.Employee,
             };
 
             // Surfaced in the switcher so they can get back out again.

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { InvitationRowActions } from "@/components/invitation-row-actions";
 import { InviteForm } from "@/components/invite-form";
+import { roleLabel } from "@/lib/roles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -58,7 +59,7 @@ export default async function InvitationsPage() {
                 {invitations.map((invitation) => (
                   <TableRow key={invitation.id}>
                     <TableCell>{invitation.email}</TableCell>
-                    <TableCell>{invitation.role}</TableCell>
+                    <TableCell>{roleLabel(invitation.role)}</TableCell>
                     <TableCell>
                       {invitation.acceptedAt
                         ? "Accepted"

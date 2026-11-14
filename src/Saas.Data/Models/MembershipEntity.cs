@@ -17,5 +17,5 @@ public class MembershipEntity : BaseEntity, ITenantScoped
 
     public UserEntity User { get; set; } = null!;
 
-    public OrganizationRole Role { get; set; } = OrganizationRole.Member;
+    public OrganizationRole Role { get; set; } = OrganizationRole.Employee;
 }

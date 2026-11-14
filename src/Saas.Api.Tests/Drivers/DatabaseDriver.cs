@@ -66,6 +66,111 @@ public class DatabaseDriver(TestSettings settings)
             : (false, false);
     }
 
+    /// <summary>Finds an account's user id by email, or null.</summary>
+    public async Task<Guid?> FindUserIdAsync(string email)
+    {
+        await using var connection = new NpgsqlConnection(settings.PostgresOwner);
+        await connection.OpenAsync();
+
+        await using var command = new NpgsqlCommand(
+            "SELECT \"Id\" FROM \"Users\" WHERE lower(\"Email\") = lower(@email)", connection);
+        command.Parameters.AddWithValue("email", email);
+
+        return await command.ExecuteScalarAsync() as Guid?;
+    }
+
+    /// <summary>
+    /// Adds a membership for an existing account, with the owner connection.
+    /// Row-level security is forced even for the owner, so the tenant is set to
+    /// the organization first, as the insert policy requires.
+    /// </summary>
+    public Task AddMembershipAsync(Guid userId, Guid organizationId, string role) =>
+        ExecuteAsTenantAsync(
+            organizationId,
+            "INSERT INTO \"Memberships\" (\"Id\", \"OrganizationId\", \"UserId\", \"Role\") " +
+            "VALUES (@id, @organization, @user, @role)",
+            command =>
+            {
+                command.Parameters.AddWithValue("id", Guid.CreateVersion7());
+                command.Parameters.AddWithValue("organization", organizationId);
+                command.Parameters.AddWithValue("user", userId);
+                command.Parameters.AddWithValue("role", RoleValue(role));
+            });
+
+    /// <summary>Writes a raw role value, including ones no role name maps to.</summary>
+    public Task SetMembershipRoleValueAsync(Guid userId, Guid organizationId, int roleValue) =>
+        ExecuteAsTenantAsync(
+            organizationId,
+            "UPDATE \"Memberships\" SET \"Role\" = @role WHERE \"OrganizationId\" = @organization AND \"UserId\" = @user",
+            command =>
+            {
+                command.Parameters.AddWithValue("organization", organizationId);
+                command.Parameters.AddWithValue("user", userId);
+                command.Parameters.AddWithValue("role", roleValue);
+            });
+
+    /// <summary>Removes a membership row.</summary>
+    public Task RemoveMembershipAsync(Guid userId, Guid organizationId) =>
+        ExecuteAsTenantAsync(
+            organizationId,
+            "DELETE FROM \"Memberships\" WHERE \"OrganizationId\" = @organization AND \"UserId\" = @user",
+            command =>
+            {
+                command.Parameters.AddWithValue("organization", organizationId);
+                command.Parameters.AddWithValue("user", userId);
+            });
+
+    /// <summary>
+    /// Counts membership and invitation rows, across every tenant, whose role
+    /// is not 0, 1 or 2. Lifts the forced policy inside a transaction that is
+    /// always rolled back, so nothing changes.
+    /// </summary>
+    public async Task<int> CountRowsWithUnknownRoleAsync()
+    {
+        await using var connection = new NpgsqlConnection(settings.PostgresOwner);
+        await connection.OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
+
+        var total = 0;
+        foreach (var table in new[] { "Memberships", "Invitations" })
+        {
+            await using var lift = new NpgsqlCommand(
+                $"ALTER TABLE \"{table}\" NO FORCE ROW LEVEL SECURITY", connection, transaction);
+            await lift.ExecuteNonQueryAsync();
+
+            await using var count = new NpgsqlCommand(
+                $"SELECT count(*) FROM \"{table}\" WHERE \"Role\" NOT IN (0, 1, 2)", connection, transaction);
+            total += Convert.ToInt32(await count.ExecuteScalarAsync());
+        }
+
+        await transaction.RollbackAsync();
+
+        return total;
+    }
+
+    private static int RoleValue(string role) => role switch
+    {
+        "Employee" => 0,
+        "Manager" => 1,
+        "HrAdmin" => 2,
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, "Unknown role name."),
+    };
+
+    private async Task ExecuteAsTenantAsync(
+        Guid organizationId,
+        string sql,
+        Action<NpgsqlCommand> bind)
+    {
+        await using var connection = new NpgsqlConnection(settings.PostgresOwner);
+        await connection.OpenAsync();
+
+        await SetTenantAsync(connection, organizationId, null);
+
+        await using var command = new NpgsqlCommand(sql, connection);
+        bind(command);
+        await command.ExecuteNonQueryAsync();
+    }
+
     private static async Task SetTenantAsync(
         NpgsqlConnection connection,
         Guid? organizationId,

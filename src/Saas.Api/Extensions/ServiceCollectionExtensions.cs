@@ -97,7 +97,7 @@ public static class ServiceCollectionExtensions
     /// </remarks>
     public static IServiceCollection AddPermissionPolicies(this IServiceCollection services)
     {
-        services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+        services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 
         var authorization = services.AddAuthorizationBuilder();
 

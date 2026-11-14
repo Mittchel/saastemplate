@@ -30,7 +30,7 @@ Feature: Platform operator
         And the workspace belonging to somebody else is not in my organization list
         When I enter the workspace belonging to somebody else
         Then entering succeeds
-        And the access token carries the role "Member"
+        And the access token carries the role "Employee"
 
     Scenario: An ordinary account cannot enter a workspace that exists but is not theirs
         Given I am signed in as an ordinary account

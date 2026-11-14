@@ -101,7 +101,7 @@ public partial class ProvisioningService(ApplicationDbContext context) : IProvis
                     {
                         OrganizationId = organization.Id,
                         UserId = userId,
-                        Role = OrganizationRole.Owner,
+                        Role = OrganizationRole.HrAdmin,
                     });
 
                     await context.SaveChangesAsync(token);
