@@ -31,7 +31,6 @@ public class DriverHooks(IObjectContainer container)
         container.RegisterInstanceAs(settings);
         container.RegisterInstanceAs(new AuthDriver(settings));
         container.RegisterInstanceAs(new ApiDriver());
-        container.RegisterInstanceAs(new DevelopmentApiDriver());
         container.RegisterInstanceAs(new DatabaseDriver(settings));
         container.RegisterInstanceAs(new ApiScenarioContext());
     }

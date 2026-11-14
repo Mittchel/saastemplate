@@ -18,11 +18,12 @@ namespace Saas.Api.Tests.Steps;
 public class RoleSteps(
     AuthDriver auth,
     ApiDriver api,
-    DevelopmentApiDriver devApi,
     DatabaseDriver database,
     TestSettings settings,
     ApiScenarioContext context)
 {
+    // A second caller, so a scenario can act as the development user while api carries the other account's token.
+    private readonly ApiDriver _devApi = new();
     private Guid? _sharedOrganizationId;
     private Guid? _memberUserId;
     private AuthDriver.TokenPair? _devTokens;
@@ -94,7 +95,7 @@ public class RoleSteps(
     {
         _devTokens ??= (await auth.SignInAsync(settings.DevUserEmail, settings.DevUserPassword))
             .ShouldNotBeNull("could not sign in as the development user");
-        devApi.Authenticate(_devTokens.AccessToken);
+        _devApi.Authenticate(_devTokens.AccessToken);
         _devOrganizationId = Guid.Parse(AuthDriver.ReadClaim(_devTokens.AccessToken, "org_id")!);
     }
 
@@ -102,7 +103,7 @@ public class RoleSteps(
     public async Task RequestMembersOfAnotherOrganization()
     {
         var foreignId = await ForeignOrganizationIdAsync();
-        var response = await devApi.GetAsync($"/organizations/{foreignId}/members");
+        var response = await _devApi.GetAsync($"/organizations/{foreignId}/members");
 
         context.LastStatusCode = (int)response.StatusCode;
     }
@@ -114,7 +115,7 @@ public class RoleSteps(
         // The development user's own id: a real member of its organization, so only the
         // organization check can produce the 404 (without it the call would reach the last-Owner rule).
         var userId = AuthDriver.ReadClaim(_devTokens!.AccessToken, "sub");
-        var response = await devApi.PutAsync(
+        var response = await _devApi.PutAsync(
             $"/organizations/{foreignId}/members/{userId}", new { role = "Member" });
 
         context.LastStatusCode = (int)response.StatusCode;
@@ -140,7 +141,7 @@ public class RoleSteps(
     [When("the development user promotes the account to Admin")]
     public async Task DevelopmentUserPromotesAccount()
     {
-        var response = await devApi.PutAsync(
+        var response = await _devApi.PutAsync(
             $"/organizations/{_devOrganizationId}/members/{_memberUserId}", new { role = "Admin" });
 
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
