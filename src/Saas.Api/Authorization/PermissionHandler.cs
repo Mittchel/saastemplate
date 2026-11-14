@@ -35,14 +35,9 @@ public class PermissionHandler(ApplicationDbContext context, ITenantContext tena
             .Select(m => new { m.Role })
             .FirstOrDefaultAsync();
 
-        // A platform operator who entered a workspace to support it has no
-        // membership row there by design. They get exactly what an Employee
-        // gets (the role their token and GET /me report), never more.
-        var role = membership?.Role
-            ?? (tenantContext.IsPlatformAdmin ? OrganizationRole.Employee : (OrganizationRole?)null);
-
-        if (role is { } effectiveRole &&
-            OrganizationRolePermissions.For(effectiveRole).Contains(requirement.Permission))
+        // No record in the active organization: the requirement fails (403).
+        if (membership is { } record &&
+            OrganizationRolePermissions.For(record.Role).Contains(requirement.Permission))
         {
             authorizationContext.Succeed(requirement);
         }
