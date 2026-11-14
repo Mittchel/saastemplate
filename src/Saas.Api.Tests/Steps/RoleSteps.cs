@@ -153,21 +153,15 @@ public class RoleSteps(
     {
         var tokens = (await auth.SignInAsync(settings.MemberUserEmail, settings.MemberUserPassword))
             .ShouldNotBeNull("could not sign in as the ordinary account");
-        api.Authenticate(tokens.AccessToken);
+        // A caller of its own, so the scenario's shared driver keeps its account.
+        var member = new ApiDriver();
+        member.Authenticate(tokens.AccessToken);
 
-        using var organizations = await api.GetJsonAsync("/organizations");
+        using var organizations = await member.GetJsonAsync("/organizations");
 
-        var id = organizations.RootElement.EnumerateArray()
+        return organizations.RootElement.EnumerateArray()
             .First(o => o.GetProperty("isPersonal").GetBoolean())
             .GetProperty("id").GetGuid();
-
-        // Hand the shared driver back to whoever the scenario had it signed in as.
-        if (context.Tokens is { } current)
-        {
-            api.Authenticate(current.AccessToken);
-        }
-
-        return id;
     }
 
     [AfterScenario]

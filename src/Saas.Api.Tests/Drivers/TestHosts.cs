@@ -292,7 +292,28 @@ public static class TestHosts
             builder.UseSetting("OpenIddict:Clients:0:ClientId", clientId);
             builder.UseSetting("OpenIddict:Clients:0:ClientSecret", clientSecret);
             builder.UseSetting("Platform:AdministratorEmail", administratorEmail);
+
+            // TestServer leaves RemoteIpAddress null, and the forwarded-headers middleware only trusts a
+            // known peer, so without this X-Forwarded-For is ignored and every sign-in shares the rate
+            // limiter's single "unknown" bucket. Loopback stands in for the proxy in front of the service.
+            builder.ConfigureServices(services =>
+                services.AddTransient<Microsoft.AspNetCore.Hosting.IStartupFilter, LoopbackPeerStartupFilter>());
         }
+    }
+
+    private sealed class LoopbackPeerStartupFilter : Microsoft.AspNetCore.Hosting.IStartupFilter
+    {
+        public Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> Configure(
+            Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> next) =>
+            app =>
+            {
+                app.Use(nextMiddleware => context =>
+                {
+                    context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
+                    return nextMiddleware(context);
+                });
+                next(app);
+            };
     }
 
     /// <summary>Forwards to the identity host's handler, resolved on first use.</summary>
