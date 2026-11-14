@@ -42,6 +42,12 @@ public static class TestHosts
     private static WebApplicationFactory<ApiEntryPoint>? _api;
     private static WebApplicationFactory<AuthEntryPoint>? _auth;
 
+    /// <summary>The temporary folder holding this run's generated certificates, or null when not started.</summary>
+    public static string? CertificateFolder => _certificates?.Folder;
+
+    /// <summary>Path of this run's generated signing <c>.pfx</c>, or null when not started.</summary>
+    public static string? SigningCertificatePath => _certificates?.SigningCertificatePath;
+
     public static string AppConnectionString { get; private set; } = string.Empty;
     public static string OwnerConnectionString { get; private set; } = string.Empty;
     public static string AiConnectionString { get; private set; } = string.Empty;
