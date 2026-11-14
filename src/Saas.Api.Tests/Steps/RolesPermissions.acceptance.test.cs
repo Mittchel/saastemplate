@@ -1,3 +1,4 @@
+using Npgsql;
 using Reqnroll;
 using Saas.Api.Tests.Drivers;
 using Shouldly;
@@ -30,7 +31,11 @@ public class RolesPermissionsAcceptanceSteps(
             .ShouldNotBeNull();
         _memberUserId = Guid.Parse(AuthDriver.ReadClaim(member.AccessToken, "sub")!);
 
-        await database.AddMembershipAsync(_devOrganizationId.Value, _memberUserId.Value, 0);
+        await ExecuteAsTenantAsync(
+            _devOrganizationId.Value,
+            _memberUserId.Value,
+            "INSERT INTO \"Memberships\" (\"Id\", \"UserId\", \"OrganizationId\", \"Role\", \"CreatedDate\") " +
+            "VALUES (gen_random_uuid(), @user, @org, 0, now())");
 
         var (tokens, status) = await auth.SwitchOrganizationAsync(
             member.RefreshToken, _devOrganizationId.Value);
@@ -42,11 +47,18 @@ public class RolesPermissionsAcceptanceSteps(
 
     [When("the permission member's role value is set to {int}")]
     public async Task SetRole(int role) =>
-        await database.SetMembershipRoleAsync(_devOrganizationId!.Value, _memberUserId!.Value, role);
+        await ExecuteAsTenantAsync(
+            _devOrganizationId!.Value,
+            _memberUserId!.Value,
+            "UPDATE \"Memberships\" SET \"Role\" = " + role +
+            " WHERE \"UserId\" = @user AND \"OrganizationId\" = @org");
 
     [When("the permission member's membership is removed")]
     public async Task RemoveMembership() =>
-        await database.RemoveMembershipAsync(_devOrganizationId!.Value, _memberUserId!.Value);
+        await ExecuteAsTenantAsync(
+            _devOrganizationId!.Value,
+            _memberUserId!.Value,
+            "DELETE FROM \"Memberships\" WHERE \"UserId\" = @user AND \"OrganizationId\" = @org");
 
     [Given("the permission development user is signed in")]
     public async Task DevSignedIn()
@@ -77,8 +89,10 @@ public class RolesPermissionsAcceptanceSteps(
     {
         var member = (await auth.SignInAsync(settings.MemberUserEmail, settings.MemberUserPassword))
             .ShouldNotBeNull();
-        // The member's personal workspace: one the operator has no membership in.
-        _foreignOrganizationId = Guid.Parse(AuthDriver.ReadClaim(member.AccessToken, "org_id")!);
+        var memberApi = new ApiDriver();
+        memberApi.Authenticate(member.AccessToken);
+        using var organizations = await memberApi.GetJsonAsync("/organizations");
+        _foreignOrganizationId = organizations.RootElement[0].GetProperty("id").GetGuid();
 
         var (tokens, status) = await auth.SwitchOrganizationAsync(_devRefresh, _foreignOrganizationId);
         status.ShouldBeInRange(200, 299);
@@ -111,7 +125,34 @@ public class RolesPermissionsAcceptanceSteps(
     {
         if (_memberUserId is not null && _devOrganizationId is not null)
         {
-            await database.RemoveMembershipAsync(_devOrganizationId.Value, _memberUserId.Value);
+            await ExecuteAsTenantAsync(
+                _devOrganizationId.Value,
+                _memberUserId.Value,
+                "DELETE FROM \"Memberships\" WHERE \"UserId\" = @user AND \"OrganizationId\" = @org");
         }
+    }
+
+    private async Task ExecuteAsTenantAsync(Guid organizationId, Guid userId, string sql)
+    {
+        await using var connection = new NpgsqlConnection(settings.PostgresOwner);
+        await connection.OpenAsync();
+
+        await using (var tenant = new NpgsqlCommand(
+            "SELECT set_config('app.organization_id', @org, false), set_config('app.user_id', @user, false)",
+            connection))
+        {
+            tenant.Parameters.AddWithValue("org", organizationId.ToString());
+            tenant.Parameters.AddWithValue("user", userId.ToString());
+            await tenant.ExecuteNonQueryAsync();
+        }
+
+        await using var command = new NpgsqlCommand(sql, connection);
+        if (sql.Contains("@user", StringComparison.Ordinal))
+        {
+            command.Parameters.AddWithValue("user", userId);
+            command.Parameters.AddWithValue("org", organizationId);
+        }
+
+        await command.ExecuteNonQueryAsync();
     }
 }
