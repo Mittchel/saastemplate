@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
+import { roleLabel } from "@/lib/roles";
 
 export const metadata = { title: "Dashboard" };
 
@@ -13,7 +14,7 @@ export default async function DashboardPage() {
           Welcome back, {user.fullName || user.email}
         </h1>
         <p className="text-muted-foreground text-sm">
-          You are working in {user.organization.name} as {user.organizationRole}.
+          You are working in {user.organization.name} as {roleLabel(user.organizationRole)}.
         </p>
       </div>
 

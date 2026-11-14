@@ -180,9 +180,10 @@ public class AuthorizationController(
         var role = await organizationService.GetRoleAsync(
             user.Id, targetOrganization.Value, cancellationToken);
 
-        // A platform operator may enter any workspace to support it. They enter
-        // as a plain Employee: the point is to see what the customer sees, and
-        // granting HrAdmin would let support quietly delete a tenant. The
+        // A platform operator may enter any workspace to support it. They have
+        // no membership record there, so the API grants them no organisation
+        // permissions at all (PermissionHandler); in particular support cannot
+        // quietly delete a tenant. The
         // existence check needs the elevated read, because an operator is not a
         // member and the ordinary lookup cannot tell "no such tenant" from
         // "not yours".

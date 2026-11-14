@@ -43,6 +43,11 @@ public class MembershipService(
     {
         RequireActiveOrganization(organizationId);
 
+        if (!Enum.IsDefined(role))
+        {
+            throw new FunctionalException("A valid role is required.", ErrorScenario.ValidationFailed);
+        }
+
         var membership = await context.Memberships
             .Include(m => m.User)
             .FirstOrDefaultAsync(

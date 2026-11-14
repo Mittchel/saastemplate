@@ -79,8 +79,9 @@ public class UserService(
                 OrganizationId = organizationId,
                 Organization = organization,
                 UserId = userId,
-                // Matches the role the token was issued with; an operator enters
-                // as an Employee, not an HR admin.
+                // Display placeholder only: the operator has no membership
+                // record here, so the API grants them no permissions in this
+                // organisation regardless of this value.
                 Role = OrganizationRole.Employee,
             };
 

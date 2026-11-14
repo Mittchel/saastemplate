@@ -1,6 +1,7 @@
 import { ProfileForm } from "@/components/profile-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
+import { roleLabel } from "@/lib/roles";
 
 export const metadata = { title: "Account" };
 
@@ -24,7 +25,7 @@ export default async function AccountPage() {
         <CardHeader>
           <CardTitle className="text-base">Workspace</CardTitle>
           <CardDescription>
-            {user.organization.name} — you are {user.organizationRole}.
+            {user.organization.name} — you are {roleLabel(user.organizationRole)}.
           </CardDescription>
         </CardHeader>
       </Card>

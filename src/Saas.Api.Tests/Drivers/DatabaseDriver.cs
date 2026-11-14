@@ -130,26 +130,13 @@ public class DatabaseDriver(TestSettings settings)
         await using var connection = new NpgsqlConnection(settings.PostgresOwner);
         await connection.OpenAsync();
 
-        var userIds = new List<Guid>();
-        await using (var users = new NpgsqlCommand("SELECT \"Id\" FROM \"Users\"", connection))
-        await using (var reader = await users.ExecuteReaderAsync())
+        // Every organization, including ones with no members (whose invitations
+        // no membership would lead to). app_list_organizations is the audited
+        // SECURITY DEFINER listing; it reads only, and RLS stays in force here.
+        var organizationIds = new List<Guid>();
+        await using (var organizations = new NpgsqlCommand("SELECT id FROM app_list_organizations()", connection))
+        await using (var reader = await organizations.ExecuteReaderAsync())
         {
-            while (await reader.ReadAsync())
-            {
-                userIds.Add(reader.GetGuid(0));
-            }
-        }
-
-        // Memberships are readable by their own user from any organization, which
-        // enumerates every organization that has at least one member.
-        var organizationIds = new HashSet<Guid>();
-        foreach (var userId in userIds)
-        {
-            await SetTenantAsync(connection, null, userId);
-            await using var memberships = new NpgsqlCommand(
-                "SELECT \"OrganizationId\" FROM \"Memberships\" WHERE \"UserId\" = @user", connection);
-            memberships.Parameters.AddWithValue("user", userId);
-            await using var reader = await memberships.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
                 organizationIds.Add(reader.GetGuid(0));

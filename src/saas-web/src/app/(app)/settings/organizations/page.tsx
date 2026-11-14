@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CreateOrganizationForm } from "@/components/create-organization-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
+import { roleLabel } from "@/lib/roles";
 
 export const metadata = { title: "Workspaces" };
 
@@ -37,7 +38,7 @@ export default async function OrganizationsPage() {
                   <span className="text-muted-foreground"> · personal</span>
                 ) : null}
               </span>
-              <span className="text-muted-foreground">{organization.role}</span>
+              <span className="text-muted-foreground">{roleLabel(organization.role)}</span>
             </div>
           ))}
         </CardContent>

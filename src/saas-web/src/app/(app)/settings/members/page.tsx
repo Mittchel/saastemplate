@@ -23,6 +23,12 @@ export default async function MembersPage() {
     notFound();
   }
 
+  // member.read is HR admin only; the API would answer 403. Hide the page
+  // instead of failing on a direct navigation.
+  if (!user.permissions.includes("member.read")) {
+    notFound();
+  }
+
   const members = await api.members(user.organization.id);
 
   // Mirrors what the API enforces; the controls are hidden rather than shown

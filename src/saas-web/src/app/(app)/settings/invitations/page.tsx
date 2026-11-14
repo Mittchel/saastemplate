@@ -23,6 +23,12 @@ export default async function InvitationsPage() {
     notFound();
   }
 
+  // member.read is HR admin only; the API would answer 403. Hide the page
+  // instead of failing on a direct navigation.
+  if (!user.permissions.includes("member.read")) {
+    notFound();
+  }
+
   const invitations = await api.invitations(user.organization.id);
   const canManage = user.permissions.includes("member.invite");
 

@@ -56,6 +56,11 @@ public class InvitationService(
         RequireActiveOrganization(organizationId);
         RequireOrganizationsEnabled();
 
+        if (!Enum.IsDefined(role))
+        {
+            throw new FunctionalException("A valid role is required.", ErrorScenario.ValidationFailed);
+        }
+
         var normalizedEmail = email.Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(normalizedEmail) || !normalizedEmail.Contains('@'))
         {
