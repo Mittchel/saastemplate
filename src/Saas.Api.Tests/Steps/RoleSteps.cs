@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using Reqnroll;
 using Saas.Api.Tests.Contexts;
 using Saas.Api.Tests.Drivers;
@@ -115,7 +117,8 @@ public class RoleSteps(
         // The development user's own id: a real member of its organization, so only the
         // organization check can produce the 404 (without it the call would reach the last-Owner rule).
         var userId = AuthDriver.ReadClaim(_devTokens!.AccessToken, "sub");
-        var response = await _devApi.PutAsync(
+        var response = await PutAsync(
+            _devTokens!.AccessToken,
             $"/organizations/{foreignId}/members/{userId}", new { role = "Member" });
 
         context.LastStatusCode = (int)response.StatusCode;
@@ -124,7 +127,8 @@ public class RoleSteps(
     [When("I change the account's role in my organization")]
     public async Task ChangeAccountRole()
     {
-        var response = await api.PutAsync(
+        var response = await PutAsync(
+            context.Tokens!.AccessToken,
             $"/organizations/{context.OrganizationId}/members/{_memberUserId}", new { role = "Member" });
 
         context.LastStatusCode = (int)response.StatusCode;
@@ -141,7 +145,8 @@ public class RoleSteps(
     [When("the development user promotes the account to Admin")]
     public async Task DevelopmentUserPromotesAccount()
     {
-        var response = await _devApi.PutAsync(
+        var response = await PutAsync(
+            _devTokens!.AccessToken,
             $"/organizations/{_devOrganizationId}/members/{_memberUserId}", new { role = "Admin" });
 
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
@@ -155,6 +160,15 @@ public class RoleSteps(
             .EnumerateArray().Select(e => e.GetString()).ToList();
 
         permissions.ShouldContain(permission);
+    }
+
+    // A PUT as the given caller, on a client of its own so the shared drivers keep their accounts.
+    private static async Task<HttpResponseMessage> PutAsync(string accessToken, string path, object body)
+    {
+        using var client = TestHosts.CreateApiClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        return await client.PutAsJsonAsync(path, body);
     }
 
     // The ordinary account's own personal organization stands in for "somebody else's".
