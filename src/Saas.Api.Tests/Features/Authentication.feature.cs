@@ -27,8 +27,8 @@ namespace Saas.Api.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Authentication", "    Signing in exchanges credentials for a token that carries the tenant, so\n    " +
-                "every downstream service resolves the organization without a lookup.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Authentication", "    Signing in exchanges credentials for a token that carries the tenant, so\r\n   " +
+                " every downstream service resolves the organization without a lookup.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "Authentication.feature"
 #line hidden
