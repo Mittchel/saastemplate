@@ -111,7 +111,7 @@ namespace Saas.Api.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Roles.feature.ndjson", 10);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Roles.feature.ndjson", 13);
         }
         
         [global::NUnit.Framework.TestAttribute()]
@@ -436,6 +436,114 @@ namespace Saas.Api.Tests.Features
 #line hidden
 #line 66
         await testRunner.ThenAsync("the member\'s response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::NUnit.Framework.TestAttribute()]
+        [global::NUnit.Framework.DescriptionAttribute("A member with the Employee role gets 403 when changing a member\'s role")]
+        public async global::System.Threading.Tasks.Task AMemberWithTheEmployeeRoleGets403WhenChangingAMembersRole()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "8";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A member with the Employee role gets 403 when changing a member\'s role", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 68
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 69
+        await testRunner.GivenAsync("I am signed in as the development user", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 70
+        await testRunner.AndAsync("the member account belongs to my organization as \"Employee\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 71
+        await testRunner.WhenAsync("the member changes their own role to \"HrAdmin\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 72
+        await testRunner.ThenAsync("the member\'s response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::NUnit.Framework.TestAttribute()]
+        [global::NUnit.Framework.DescriptionAttribute("A member with the Manager role gets 403 when changing a member\'s role")]
+        public async global::System.Threading.Tasks.Task AMemberWithTheManagerRoleGets403WhenChangingAMembersRole()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "9";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A member with the Manager role gets 403 when changing a member\'s role", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 74
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 75
+        await testRunner.GivenAsync("I am signed in as the development user", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 76
+        await testRunner.AndAsync("the member account belongs to my organization as \"Manager\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 77
+        await testRunner.WhenAsync("the member changes their own role to \"HrAdmin\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 78
+        await testRunner.ThenAsync("the member\'s response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::NUnit.Framework.TestAttribute()]
+        [global::NUnit.Framework.DescriptionAttribute("A member with the HrAdmin role can change a member\'s role")]
+        public async global::System.Threading.Tasks.Task AMemberWithTheHrAdminRoleCanChangeAMembersRole()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "10";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A member with the HrAdmin role can change a member\'s role", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 80
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 81
+        await testRunner.GivenAsync("I am signed in as the development user", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 82
+        await testRunner.AndAsync("the member account belongs to my organization as \"HrAdmin\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 83
+        await testRunner.WhenAsync("the member changes their own role to \"HrAdmin\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 84
+        await testRunner.ThenAsync("the member\'s response status is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
