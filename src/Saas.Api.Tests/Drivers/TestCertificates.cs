@@ -29,16 +29,19 @@ public sealed class TestCertificates : IDisposable
     public string EncryptionCertificatePath { get; }
 
     /// <summary>Generates both certificates. The folder is removed again if anything fails.</summary>
-    public static TestCertificates Create()
+    public static TestCertificates Create() => Create(Path.GetTempPath(), "CN=saas-test-signing");
+
+    /// <summary>Lets a test choose the parent folder and break the subject, to prove a failed run cleans up.</summary>
+    internal static TestCertificates Create(string parent, string signingSubject)
     {
         var password = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
-        var folder = Path.Combine(Path.GetTempPath(), "saas-test-certs-" + Guid.CreateVersion7().ToString("n"));
+        var folder = Path.Combine(parent, "saas-test-certs-" + Guid.CreateVersion7().ToString("n"));
         Directory.CreateDirectory(folder);
 
         var certificates = new TestCertificates(folder, password);
         try
         {
-            Export(certificates.SigningCertificatePath, "CN=saas-test-signing", X509KeyUsageFlags.DigitalSignature, password);
+            Export(certificates.SigningCertificatePath, signingSubject, X509KeyUsageFlags.DigitalSignature, password);
             Export(certificates.EncryptionCertificatePath, "CN=saas-test-encryption", X509KeyUsageFlags.KeyEncipherment, password);
             return certificates;
         }

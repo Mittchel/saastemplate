@@ -48,6 +48,13 @@ public static class TestHosts
     /// <summary>Path of this run's generated signing <c>.pfx</c>, or null when not started.</summary>
     public static string? SigningCertificatePath => _certificates?.SigningCertificatePath;
 
+    /// <summary>Path of this run's generated encryption <c>.pfx</c>, or null when not started.</summary>
+    public static string? EncryptionCertificatePath => _certificates?.EncryptionCertificatePath;
+
+    /// <summary>The identity host's services, to inspect the credentials it actually loaded.</summary>
+    public static IServiceProvider AuthServices =>
+        (_auth ?? throw new InvalidOperationException("Test hosts are not started.")).Services;
+
     /// <summary>Password of this run's generated <c>.pfx</c> files, or null when not started.</summary>
     public static string? CertificatePassword => _certificates?.Password;
 
