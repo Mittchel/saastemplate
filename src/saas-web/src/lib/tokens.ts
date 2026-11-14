@@ -14,7 +14,7 @@ export interface TokenPair {
   /** Epoch milliseconds. */
   expiresAt: number;
   organizationId: string;
-  organizationRole: string;
+  organizationRole: string | null;
 }
 
 interface TokenEndpointResponse {
@@ -35,11 +35,11 @@ export class TokenError extends Error {
 }
 
 /** Reads the tenant claims straight off the access token. */
-function readClaims(accessToken: string): { organizationId: string; organizationRole: string } {
+function readClaims(accessToken: string): { organizationId: string; organizationRole: string | null } {
   const payload = accessToken.split(".")[1];
 
   if (!payload) {
-    return { organizationId: "", organizationRole: "" };
+    return { organizationId: "", organizationRole: null };
   }
 
   // Signature verification is the API's job, not the client's; this only reads
@@ -48,7 +48,7 @@ function readClaims(accessToken: string): { organizationId: string; organization
 
   return {
     organizationId: decoded.org_id ?? "",
-    organizationRole: decoded.org_role ?? "",
+    organizationRole: decoded.org_role ?? null,
   };
 }
 

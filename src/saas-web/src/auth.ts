@@ -111,7 +111,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
           refreshToken: string;
           expiresAt: number;
           organizationId: string;
-          organizationRole: string;
+          organizationRole: string | null;
         };
 
         return {
@@ -167,7 +167,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
     async session({ session, token }) {
       session.accessToken = token.accessToken as string;
       session.organizationId = token.organizationId as string;
-      session.organizationRole = token.organizationRole as string;
+      session.organizationRole = (token.organizationRole as string | null) ?? undefined;
       session.error = token.error as string | undefined;
 
       return session;

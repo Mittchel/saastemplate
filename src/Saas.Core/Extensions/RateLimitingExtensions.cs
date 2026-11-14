@@ -46,6 +46,9 @@ public static class RateLimitingExtensions
     /// <summary>Configuration key that overrides the identity service's permit limit.</summary>
     public const string AuthPermitLimitKey = "RateLimiting:AuthPermitLimit";
 
+    private const int DefaultAuthPermitLimit = 60;
+    private const int MaxAuthPermitLimit = 100_000;
+
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">
     /// Read for <see cref="AuthPermitLimitKey"/>. Only the test host sets it:
@@ -56,7 +59,15 @@ public static class RateLimitingExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var authPermitLimit = configuration.GetValue(AuthPermitLimitKey, 60);
+        // Reject nonsense instead of silently weakening the password-guessing
+        // throttle (or making the limiter throw on the first request).
+        var authPermitLimit = configuration.GetValue(AuthPermitLimitKey, DefaultAuthPermitLimit);
+
+        if (authPermitLimit is < 1 or > MaxAuthPermitLimit)
+        {
+            throw new InvalidOperationException(
+                $"{AuthPermitLimitKey} must be between 1 and {MaxAuthPermitLimit}.");
+        }
 
         services.AddRateLimiter(limiter =>
         {

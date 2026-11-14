@@ -22,7 +22,7 @@ declare module "next-auth/jwt" {
     /** Epoch milliseconds. */
     expiresAt?: number;
     organizationId?: string;
-    organizationRole?: string;
+    organizationRole?: string | null;
     error?: string;
   }
 }
