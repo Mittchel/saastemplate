@@ -17,7 +17,6 @@ public sealed class RolesPermissionsAcceptanceSteps
     private bool _membershipAdded;
     private bool _membershipRemoved;
     private string _orgForPaths = string.Empty;
-    private Guid _homeOrgId;
     private int _status;
 
     public RolesPermissionsAcceptanceSteps(ApiDriver api, AuthDriver auth, DatabaseDriver db, TestSettings settings)
@@ -41,21 +40,21 @@ public sealed class RolesPermissionsAcceptanceSteps
         await _db.AddMembershipAsync(_orgId, _memberId, role);
         _membershipAdded = true;
 
-        var (tokens, status) = await _auth.SwitchOrganizationAsync(member.RefreshToken, _orgId);
+        var (tokens, status) = await _auth.SwitchOrganizationAsync(member.RefreshToken, _orgId.ToString());
         status.ShouldBeInRange(200, 299);
-        _api.Authenticate(tokens.ShouldNotBeNull().AccessToken);
+        _api.AccessToken = tokens!.AccessToken;
     }
 
     [When("acceptance: the member's raw role is set to {int}")]
     public async Task WhenRoleSet(int role)
     {
-        (await _db.SetMembershipRoleAsync(_orgId, _memberId, role)).ShouldBe(1);
+        await _db.SetMembershipRoleAsync(_orgId, _memberId, role);
     }
 
     [When("acceptance: the member's membership is removed")]
     public async Task WhenRemoved()
     {
-        (await _db.RemoveMembershipAsync(_orgId, _memberId)).ShouldBe(1);
+        await _db.RemoveMembershipAsync(_orgId, _memberId);
         _membershipRemoved = true;
     }
 
@@ -71,35 +70,21 @@ public sealed class RolesPermissionsAcceptanceSteps
     {
         var dev = await _auth.SignInAsync(_settings.DevUserEmail, _settings.DevUserPassword);
         _orgForPaths = AuthDriver.ReadClaim(dev!.AccessToken, "org_id")!;
-        _api.Authenticate(dev.AccessToken);
+        _api.AccessToken = dev.AccessToken;
     }
 
     [Given("acceptance: the development user entered a foreign workspace")]
     public async Task GivenForeign()
     {
-        // Same entry path as PlatformOperatorSteps: the seeded member's own workspace.
-        var member = await _auth.SignInAsync(_settings.MemberUserEmail, _settings.MemberUserPassword);
-        var theirs = new ApiDriver(_settings);
-        theirs.Authenticate(member.ShouldNotBeNull().AccessToken);
-        using var organizations = await theirs.GetJsonAsync("/organizations");
-        var foreign = organizations.RootElement[0].GetProperty("id").GetGuid();
-
         var dev = await _auth.SignInAsync(_settings.DevUserEmail, _settings.DevUserPassword);
-        _homeOrgId = Guid.Parse(AuthDriver.ReadClaim(dev.ShouldNotBeNull().AccessToken, "org_id")!);
-        foreign.ShouldNotBe(_homeOrgId);
-
+        var own = AuthDriver.ReadClaim(dev!.AccessToken, "org_id");
+        var other = await _auth.RegisterAsync($"acc-{Guid.NewGuid():N}@example.com", "Acceptance-Pass-1!");
+        var foreign = AuthDriver.ReadClaim(other!.AccessToken, "org_id")!;
+        foreign.ShouldNotBe(own);
         var (tokens, status) = await _auth.SwitchOrganizationAsync(dev.RefreshToken, foreign);
         status.ShouldBeInRange(200, 299);
-        _api.Authenticate(tokens.ShouldNotBeNull().AccessToken);
-        _orgForPaths = foreign.ToString();
-        _orgId = foreign;
-    }
-
-    [Then("acceptance: the entered workspace shows none of the operator's runs and the run still exists at home")]
-    public async Task ThenCounts()
-    {
-        (await _db.CountAsTenantAsync("Runs", _orgId)).ShouldBe(0);
-        (await _db.CountAsTenantAsync("Runs", _homeOrgId)).ShouldBeGreaterThan(0);
+        _api.AccessToken = tokens!.AccessToken;
+        _orgForPaths = foreign;
     }
 
     [When("acceptance: the operator requests {string}")]

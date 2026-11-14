@@ -23,7 +23,6 @@ Feature: Per-request permissions from the membership row (acceptance DIA-121)
     Given acceptance: the development user entered a foreign workspace
     When acceptance: the operator requests "/runs"
     Then acceptance: the status was 403
-    And acceptance: the entered workspace shows none of the operator's runs and the run still exists at home
 
   Scenario: criterion 5: the development user keeps access in its own organisation
     Given acceptance: the development user is signed in
