@@ -62,7 +62,7 @@ public static class ServiceCollectionExtensions
                     ValidIssuers = IssuerVariants(options),
 
                     // OpenIddict scopes tokens by resource rather than a single
-                    // audience; authorization is enforced by permission claims
+                    // audience; authorization is enforced per request from the membership row
                     // below, which is the check that actually matters here.
                     ValidateAudience = false,
 
@@ -97,7 +97,7 @@ public static class ServiceCollectionExtensions
     /// </remarks>
     public static IServiceCollection AddPermissionPolicies(this IServiceCollection services)
     {
-        services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+        services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 
         var authorization = services.AddAuthorizationBuilder();
 

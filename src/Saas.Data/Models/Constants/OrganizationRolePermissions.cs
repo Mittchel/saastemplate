@@ -4,9 +4,10 @@ namespace Saas.Data.Models.Constants;
 /// Maps an organization role to the permissions it implies.
 /// </summary>
 /// <remarks>
-/// Keeps the two authorization systems coherent: the identity service expands a
-/// member's <see cref="OrganizationRole"/> into <c>permission</c> claims, so the
-/// resource API only ever checks permissions, never roles.
+/// The resource API resolves a caller's permissions from this mapping on every
+/// request, so it only ever checks permissions, never roles. The identity
+/// service uses the same mapping for the <c>permission</c> claims it mints for
+/// the UI. Any stored value that is not a defined role grants nothing.
 /// </remarks>
 public static class OrganizationRolePermissions
 {
@@ -26,11 +27,12 @@ public static class OrganizationRolePermissions
             Permissions.RunCreate, Permissions.RunRead,
             Permissions.UserRead,
         ],
-        _ =>
+        OrganizationRole.Member =>
         [
             Permissions.OrganizationRead,
             Permissions.MemberRead,
             Permissions.RunCreate, Permissions.RunRead,
         ],
+        _ => [],
     };
 }

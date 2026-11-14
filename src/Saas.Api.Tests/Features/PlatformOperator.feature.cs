@@ -27,9 +27,9 @@ namespace Saas.Api.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Platform operator", "    One account operates the installation. It can see every workspace and enter\r\n" +
-                "    any of them for support -- but it enters as an ordinary member, and once\r\n  " +
-                "  inside, the database scopes it to that single tenant like anyone else.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Platform operator", "    One account operates the installation. It can see every workspace and enter\n " +
+                "   any of them for support -- but it enters as an ordinary member, and once\n    " +
+                "inside, the database scopes it to that single tenant like anyone else.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "PlatformOperator.feature"
 #line hidden
@@ -371,18 +371,15 @@ namespace Saas.Api.Tests.Features
         await testRunner.AndAsync("I have entered the workspace belonging to somebody else", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 44
-        await testRunner.WhenAsync("I request \"/me\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.WhenAsync("I request \"/runs\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 45
-        await testRunner.ThenAsync("the response status is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.ThenAsync("the response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 46
-        await testRunner.AndAsync("the response field \"organization.id\" matches the token\'s organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 47
         await testRunner.ButAsync("my own workspace\'s run is no longer visible to me", ((string)(null)), ((global::Reqnroll.Table)(null)), "But ");
 #line hidden
-#line 48
+#line 47
         await testRunner.AndAsync("the run is still there for the workspace it belongs to", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }

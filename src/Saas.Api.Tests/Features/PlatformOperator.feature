@@ -41,8 +41,7 @@ Feature: Platform operator
         Given I am signed in as the development user
         And I have started a run
         And I have entered the workspace belonging to somebody else
-        When I request "/me"
-        Then the response status is 200
-        And the response field "organization.id" matches the token's organization
+        When I request "/runs"
+        Then the response status is 403
         But my own workspace's run is no longer visible to me
         And the run is still there for the workspace it belongs to
