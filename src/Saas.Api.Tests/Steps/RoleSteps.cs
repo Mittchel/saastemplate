@@ -1,7 +1,6 @@
 using Reqnroll;
 using Saas.Api.Tests.Contexts;
 using Saas.Api.Tests.Drivers;
-using Saas.Data.Models;
 using Shouldly;
 
 namespace Saas.Api.Tests.Steps;
@@ -39,7 +38,7 @@ public class RoleSteps(
             .ShouldNotBeNull($"could not sign in as {settings.MemberUserEmail}; is the stack seeded?");
         var userId = Guid.Parse(AuthDriver.ReadClaim(member.AccessToken, "sub")!);
 
-        await database.AddMembershipAsync(organizationId, userId, (int)OrganizationRole.Member);
+        await database.AddMembershipAsync(organizationId, userId, 0); // raw role value 0 = ordinary member
 
         // Recorded only once the row exists, so the hook removes exactly what was added.
         _sharedOrganizationId = organizationId;
