@@ -86,8 +86,11 @@ public sealed class TestCertificates : IDisposable
 
         var encryption = new PbeParameters(PbeEncryptionAlgorithm.Aes256Cbc, HashAlgorithmName.SHA256, 100_000);
         var contents = new Pkcs12SafeContents();
-        contents.AddCertificate(certificate);
-        contents.AddShroudedKey(rsa, password, encryption);
+
+        // The same localKeyId on both bags is how the loader pairs the key with the certificate.
+        var keyId = RandomNumberGenerator.GetBytes(20);
+        contents.AddCertificate(certificate).Attributes.Add(new Pkcs9LocalKeyId(keyId));
+        contents.AddShroudedKey(rsa, password, encryption).Attributes.Add(new Pkcs9LocalKeyId(keyId));
 
         var builder = new Pkcs12Builder();
         builder.AddSafeContentsEncrypted(contents, password, encryption);
