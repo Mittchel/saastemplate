@@ -44,7 +44,7 @@ public class SourceTextRemovalAcceptanceTests
     public void Criterion_1_TestInfrastructure_feature_file_is_gone()
     {
         var root = FindRoot();
-        Assume.That(root, Is.Not.Null);
+        Assert.That(root, Is.Not.Null);
         File.Exists(Path.Combine(root!, "src", "Saas.Api.Tests", "Features", "TestInfrastructure.acceptance.feature"))
             .ShouldBeFalse();
     }
@@ -53,7 +53,7 @@ public class SourceTextRemovalAcceptanceTests
     public void Criterion_2_generated_feature_code_is_gone()
     {
         var root = FindRoot();
-        Assume.That(root, Is.Not.Null);
+        Assert.That(root, Is.Not.Null);
         File.Exists(Path.Combine(root!, "src", "Saas.Api.Tests", "Features", "TestInfrastructure.acceptance.feature.cs"))
             .ShouldBeFalse();
         LoadTypes().Where(t => t.Name.Contains("TestInfrastructureFeature", StringComparison.Ordinal))
@@ -64,7 +64,7 @@ public class SourceTextRemovalAcceptanceTests
     public void Criterion_3_TestInfrastructureSteps_is_deleted()
     {
         var root = FindRoot();
-        Assume.That(root, Is.Not.Null);
+        Assert.That(root, Is.Not.Null);
         File.Exists(Path.Combine(root!, "src", "Saas.Api.Tests", "Steps", "TestInfrastructureSteps.cs"))
             .ShouldBeFalse();
         LoadTypes().Where(t => t.Name == "TestInfrastructureSteps").ShouldBeEmpty();
