@@ -64,3 +64,21 @@ Feature: Roles
         When the member's membership is removed
         And the member lists the organization's members
         Then the member's response status is 403
+
+    Scenario: A member with the Employee role gets 403 when changing a member's role
+        Given I am signed in as the development user
+        And the member account belongs to my organization as "Employee"
+        When the member changes their own role to "HrAdmin"
+        Then the member's response status is 403
+
+    Scenario: A member with the Manager role gets 403 when changing a member's role
+        Given I am signed in as the development user
+        And the member account belongs to my organization as "Manager"
+        When the member changes their own role to "HrAdmin"
+        Then the member's response status is 403
+
+    Scenario: A member with the HrAdmin role can change a member's role
+        Given I am signed in as the development user
+        And the member account belongs to my organization as "HrAdmin"
+        When the member changes their own role to "HrAdmin"
+        Then the member's response status is 200

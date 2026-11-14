@@ -83,6 +83,14 @@ public class RoleSteps(
         response.IsSuccessStatusCode.ShouldBeTrue($"changing the role returned {(int)response.StatusCode}");
     }
 
+    [When("the member changes their own role to {string}")]
+    public async Task MemberChangesOwnRole(string role)
+    {
+        var response = await _memberApi.PutAsync(
+            $"/organizations/{_organizationId}/members/{_memberUserId}", new { role });
+        _memberStatus = (int)response.StatusCode;
+    }
+
     [When("the member's membership is removed")]
     public Task RemoveMemberMembership() =>
         database.RemoveMembershipAsync(_memberUserId!.Value, _organizationId!.Value);
