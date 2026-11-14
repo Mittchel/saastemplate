@@ -125,7 +125,7 @@ public static class ServiceCollectionExtensions
                 // from the JWKS endpoint, so this key must outlive a restart.
                 // OpenIddict's development certificates are regenerated on every
                 // boot and would invalidate every issued token.
-                if (TryLoadCertificates(certificates, out var signing, out var encryption))
+                if (TryLoadCertificates(certificates, environment, out var signing, out var encryption))
                 {
                     options.AddSigningCertificate(signing!)
                         .AddEncryptionCertificate(encryption!);
@@ -167,6 +167,7 @@ public static class ServiceCollectionExtensions
 
     private static bool TryLoadCertificates(
         OpenIddictCertificateOptions options,
+        IWebHostEnvironment environment,
         out X509Certificate2? signing,
         out X509Certificate2? encryption)
     {
@@ -180,8 +181,11 @@ public static class ServiceCollectionExtensions
             return false;
         }
 
-        // EphemeralKeySet is not supported on macOS, where the default flags are used.
-        var flags = OperatingSystem.IsMacOS() ? X509KeyStorageFlags.DefaultKeySet : X509KeyStorageFlags.EphemeralKeySet;
+        // EphemeralKeySet is not supported on macOS, so Development there (where the tests run) uses the
+        // default flags. Every other case keeps the ephemeral key set.
+        var flags = OperatingSystem.IsMacOS() && environment.IsDevelopment()
+            ? X509KeyStorageFlags.DefaultKeySet
+            : X509KeyStorageFlags.EphemeralKeySet;
 
         signing = X509CertificateLoader.LoadPkcs12FromFile(
             options.SigningCertificatePath!,
