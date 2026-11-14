@@ -27,9 +27,9 @@ namespace Saas.Api.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Platform operator", "    One account operates the installation. It can see every workspace and enter\n " +
-                "   any of them for support -- but it enters as an ordinary member, and once\n    " +
-                "inside, the database scopes it to that single tenant like anyone else.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Platform operator", "    One account operates the installation. It can see every workspace and enter\r\n" +
+                "    any of them for support -- but it enters as an ordinary member, and once\r\n  " +
+                "  inside, the database scopes it to that single tenant like anyone else.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "PlatformOperator.feature"
 #line hidden

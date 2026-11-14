@@ -113,13 +113,13 @@ namespace Saas.Api.Tests.Features
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 1, 6, 7 and 8: an undefined stored role grants nothing")]
-        public async global::System.Threading.Tasks.Task Criterion167And8AnUndefinedStoredRoleGrantsNothing()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 1: an undefined stored role value gets 403 with the same token")]
+        public async global::System.Threading.Tasks.Task Criterion1AnUndefinedStoredRoleValueGets403WithTheSameToken()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 1, 6, 7 and 8: an undefined stored role grants nothing", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 1: an undefined stored role value gets 403 with the same token", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 4
@@ -133,35 +133,29 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 5
-    await testRunner.GivenAsync("acc: the member is switched into the development organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("acc the member is switched into the development user\'s organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 6
-    await testRunner.WhenAsync("acc: the member row role is set to 99", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("acc the member\'s stored role is set to 99", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 7
-    await testRunner.ThenAsync("acc: GET \"/runs\" answers 403 with the member token", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 8
-    await testRunner.AndAsync("acc: GET members of the development organisation answers 403 with the member toke" +
-                        "n", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("acc the member gets 403 from the members list and from runs", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 2, 3, 6, 7, 9 and 10: a removed membership is refused on the same token" +
-            "")]
-        public async global::System.Threading.Tasks.Task Criterion23679And10ARemovedMembershipIsRefusedOnTheSameToken()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 2 and 3: removed membership gets 403, before removal 200")]
+        public async global::System.Threading.Tasks.Task Criterion2And3RemovedMembershipGets403BeforeRemoval200()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "1";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 2, 3, 6, 7, 9 and 10: a removed membership is refused on the same token" +
-                    "", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 2 and 3: removed membership gets 403, before removal 200", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 10
+#line 9
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -171,37 +165,33 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
+#line 10
+    await testRunner.GivenAsync("acc the member is switched into the development user\'s organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
 #line 11
-    await testRunner.GivenAsync("acc: the member is switched into the development organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.ThenAsync("acc the member gets 200 from runs", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 12
-    await testRunner.ThenAsync("acc: GET \"/runs\" answers 200 with the member token", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.WhenAsync("acc the member\'s membership is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 13
-    await testRunner.WhenAsync("acc: the member row is removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 14
-    await testRunner.ThenAsync("acc: GET \"/runs\" answers 403 with the member token", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 15
-    await testRunner.AndAsync("acc: GET members of the development organisation answers 403 with the member toke" +
-                        "n", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("acc the member gets 403 from the members list and from runs", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 4 and 11: an operator in a workspace without membership is refused")]
-        public async global::System.Threading.Tasks.Task Criterion4And11AnOperatorInAWorkspaceWithoutMembershipIsRefused()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 4: operator in a workspace without membership gets 403")]
+        public async global::System.Threading.Tasks.Task Criterion4OperatorInAWorkspaceWithoutMembershipGets403()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 4 and 11: an operator in a workspace without membership is refused", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 4: operator in a workspace without membership gets 403", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 17
+#line 15
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -211,30 +201,27 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 18
-    await testRunner.GivenAsync("acc: a platform operator has entered a workspace without membership", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 16
+    await testRunner.GivenAsync("acc the operator has entered a workspace they are not a member of", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 19
-    await testRunner.ThenAsync("acc: GET \"/runs\" answers 403 with the operator token", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 20
-    await testRunner.AndAsync("acc: the entered workspace holds 0 of the operator\'s runs by direct count", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 17
+    await testRunner.ThenAsync("acc the operator gets 403 from runs", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 5: the development user keeps access")]
-        public async global::System.Threading.Tasks.Task Criterion5TheDevelopmentUserKeepsAccess()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 5: the development user keeps access in its own organisation")]
+        public async global::System.Threading.Tasks.Task Criterion5TheDevelopmentUserKeepsAccessInItsOwnOrganisation()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 5: the development user keeps access", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 5: the development user keeps access in its own organisation", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 22
+#line 19
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -244,15 +231,11 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 23
-    await testRunner.GivenAsync("acc: the development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 20
+    await testRunner.GivenAsync("acc the development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 24
-    await testRunner.ThenAsync("acc: GET \"/runs\" answers 200 with the development token", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 25
-    await testRunner.AndAsync("acc: GET members of the development organisation answers 200 with the development" +
-                        " token", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 21
+    await testRunner.ThenAsync("acc the development user gets 200 from runs and the members list", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
