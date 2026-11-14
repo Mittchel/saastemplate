@@ -6,7 +6,23 @@ namespace Saas.Api.Tests.Drivers;
 /// <summary>Talks to the identity service's token endpoint.</summary>
 public class AuthDriver(TestSettings settings)
 {
-    private readonly HttpClient _client = TestHosts.CreateAuthClient();
+    private static int _nextClient;
+
+    private readonly HttpClient _client = CreateClient();
+
+    // Every scenario would otherwise share the in-process host's one loopback
+    // address, and so one per-IP rate-limit bucket (60 token calls a minute).
+    // The host trusts X-Forwarded-For as it does behind the proxy, so each
+    // driver presents itself as a distinct client.
+    private static HttpClient CreateClient()
+    {
+        var client = TestHosts.CreateAuthClient();
+        var n = Interlocked.Increment(ref _nextClient);
+
+        client.DefaultRequestHeaders.Add("X-Forwarded-For", $"10.{(n >> 16) & 255}.{(n >> 8) & 255}.{n & 255}");
+
+        return client;
+    }
 
     public sealed record TokenPair(string AccessToken, string RefreshToken);
 

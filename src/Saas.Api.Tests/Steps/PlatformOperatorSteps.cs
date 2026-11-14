@@ -210,7 +210,7 @@ public class PlatformOperatorSteps(
             .EnumerateArray().ToList();
 
         var home = organizations.Single(o => o.GetProperty("id").GetGuid() == context.HomeOrganizationId!.Value);
-        home.GetProperty("role").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.String);
+        home.GetProperty("role").GetString().ShouldBe("Owner");
 
         var entered = organizations.Single(o => o.GetProperty("id").GetGuid() == context.ForeignOrganizationId!.Value);
         entered.GetProperty("role").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Null);
