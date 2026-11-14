@@ -82,3 +82,24 @@ Feature: Roles
         And the member account belongs to my organization as "HrAdmin"
         When the member changes their own role to "HrAdmin"
         Then the member's response status is 200
+
+    Scenario: An HR admin gets 404 for another organization's members
+        Given I am signed in as the development user
+        And a workspace exists that belongs to somebody else
+        When I list the members of the workspace belonging to somebody else
+        Then the response status is 404
+
+    Scenario: An HR admin gets 404 when changing a role in another organization
+        Given I am signed in as the development user
+        And a workspace exists that belongs to somebody else
+        When I change my own role in the workspace belonging to somebody else to "HrAdmin"
+        Then the response status is 404
+
+    Scenario: A platform operator who entered a workspace gets 403 for HR-admin endpoints
+        Given I am signed in as the development user
+        And a workspace exists that belongs to somebody else
+        And I have entered the workspace belonging to somebody else
+        When I list the members of the workspace belonging to somebody else
+        Then the response status is 403
+        When I change my own role in the workspace belonging to somebody else to "HrAdmin"
+        Then the response status is 403

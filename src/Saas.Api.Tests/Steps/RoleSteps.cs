@@ -91,6 +91,23 @@ public class RoleSteps(
         _memberStatus = (int)response.StatusCode;
     }
 
+    [When("I list the members of the workspace belonging to somebody else")]
+    public async Task ListForeignMembers()
+    {
+        var response = await api.GetAsync($"/organizations/{context.ForeignOrganizationId}/members");
+        context.LastStatusCode = (int)response.StatusCode;
+    }
+
+    [When("I change my own role in the workspace belonging to somebody else to {string}")]
+    public async Task ChangeOwnRoleInForeignWorkspace(string role)
+    {
+        var userId = await database.FindUserIdAsync(settings.DevUserEmail)
+            ?? throw new InvalidOperationException("the development user does not exist.");
+        var response = await api.PutAsync(
+            $"/organizations/{context.ForeignOrganizationId}/members/{userId}", new { role });
+        context.LastStatusCode = (int)response.StatusCode;
+    }
+
     [When("the member's membership is removed")]
     public Task RemoveMemberMembership() =>
         database.RemoveMembershipAsync(_memberUserId!.Value, _organizationId!.Value);
