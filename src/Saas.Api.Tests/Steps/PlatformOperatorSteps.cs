@@ -45,6 +45,7 @@ public class PlatformOperatorSteps(
 
     private AuthDriver.TokenPair? _entered;
     private int _enterStatus;
+    private string? _homeRole;
 
     [Given("a workspace exists that belongs to somebody else")]
     public async Task AWorkspaceBelongsToSomebodyElse()
@@ -119,6 +120,10 @@ public class PlatformOperatorSteps(
     [Given("I have entered the workspace belonging to somebody else")]
     public async Task EnterForeignWorkspace()
     {
+        // The home role is read from the token before entering, so the later
+        // organizations check compares against what the operator really holds.
+        _homeRole = AuthDriver.ReadClaim(context.Tokens!.AccessToken, "org_role");
+
         (_entered, _enterStatus) = await auth.SwitchOrganizationAsync(
             context.Tokens!.RefreshToken, context.ForeignOrganizationId!.Value);
 
@@ -210,7 +215,7 @@ public class PlatformOperatorSteps(
             .EnumerateArray().ToList();
 
         var home = organizations.Single(o => o.GetProperty("id").GetGuid() == context.HomeOrganizationId!.Value);
-        home.GetProperty("role").GetString().ShouldBe("Owner");
+        home.GetProperty("role").GetString().ShouldBe(_homeRole);
 
         var entered = organizations.Single(o => o.GetProperty("id").GetGuid() == context.ForeignOrganizationId!.Value);
         entered.GetProperty("role").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Null);
