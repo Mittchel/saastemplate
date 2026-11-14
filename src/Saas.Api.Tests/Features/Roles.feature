@@ -29,7 +29,8 @@ Feature: Roles
         Then the response status is 200
 
     Scenario: Another organization's id answers 404 for its owner
-        Given I am signed in as the development user
+        Given an ordinary account has been switched into the development user's organization
+        And the development user is signed in as a second caller
         When I request the members of another organization
         Then the response status is 404
         When I change a member's role to Member in another organization

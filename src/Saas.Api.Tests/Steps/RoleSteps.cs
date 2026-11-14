@@ -18,13 +18,13 @@ namespace Saas.Api.Tests.Steps;
 public class RoleSteps(
     AuthDriver auth,
     ApiDriver api,
+    DevelopmentApiDriver devApi,
     DatabaseDriver database,
     TestSettings settings,
     ApiScenarioContext context)
 {
     private Guid? _sharedOrganizationId;
     private Guid? _memberUserId;
-    private readonly ApiDriver _devApi = new();
     private AuthDriver.TokenPair? _devTokens;
     private Guid _devOrganizationId;
 
@@ -87,7 +87,7 @@ public class RoleSteps(
     {
         _devTokens = (await auth.SignInAsync(settings.DevUserEmail, settings.DevUserPassword))
             .ShouldNotBeNull("could not sign in as the development user");
-        _devApi.Authenticate(_devTokens.AccessToken);
+        devApi.Authenticate(_devTokens.AccessToken);
         _devOrganizationId = Guid.Parse(AuthDriver.ReadClaim(_devTokens.AccessToken, "org_id")!);
     }
 
@@ -95,7 +95,7 @@ public class RoleSteps(
     public async Task RequestMembersOfAnotherOrganization()
     {
         var foreignId = await ForeignOrganizationIdAsync();
-        var response = await api.GetAsync($"/organizations/{foreignId}/members");
+        var response = await devApi.GetAsync($"/organizations/{foreignId}/members");
 
         context.LastStatusCode = (int)response.StatusCode;
     }
@@ -104,8 +104,10 @@ public class RoleSteps(
     public async Task ChangeRoleInAnotherOrganization()
     {
         var foreignId = await ForeignOrganizationIdAsync();
-        var response = await api.PutAsync(
-            $"/organizations/{foreignId}/members/{Guid.NewGuid()}", new { role = "Member" });
+        // A real member of the development user's organization, so only the
+        // organization check can produce the 404.
+        var response = await devApi.PutAsync(
+            $"/organizations/{foreignId}/members/{_memberUserId}", new { role = "Member" });
 
         context.LastStatusCode = (int)response.StatusCode;
     }
@@ -130,7 +132,7 @@ public class RoleSteps(
     [When("the development user promotes the account to Admin")]
     public async Task DevelopmentUserPromotesAccount()
     {
-        var response = await _devApi.PutAsync(
+        var response = await devApi.PutAsync(
             $"/organizations/{_devOrganizationId}/members/{_memberUserId}", new { role = "Admin" });
 
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
@@ -151,14 +153,21 @@ public class RoleSteps(
     {
         var tokens = (await auth.SignInAsync(settings.MemberUserEmail, settings.MemberUserPassword))
             .ShouldNotBeNull("could not sign in as the ordinary account");
-        var memberApi = new ApiDriver();
-        memberApi.Authenticate(tokens.AccessToken);
+        api.Authenticate(tokens.AccessToken);
 
-        using var organizations = await memberApi.GetJsonAsync("/organizations");
+        using var organizations = await api.GetJsonAsync("/organizations");
 
-        return organizations.RootElement.EnumerateArray()
+        var id = organizations.RootElement.EnumerateArray()
             .First(o => o.GetProperty("isPersonal").GetBoolean())
             .GetProperty("id").GetGuid();
+
+        // Hand the shared driver back to whoever the scenario had it signed in as.
+        if (context.Tokens is { } current)
+        {
+            api.Authenticate(current.AccessToken);
+        }
+
+        return id;
     }
 
     [AfterScenario]
