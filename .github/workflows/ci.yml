@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  # A new push supersedes the run already in flight for the same branch.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dotnet:
+    name: .NET build and integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build
+        run: dotnet build Saas.slnx --configuration Release
+
+      # The integration tests run against the real stack rather than an
+      # in-memory host, because the guarantee most worth testing is Postgres
+      # row-level security and an in-memory database has none to enforce.
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci_postgres/' .env
+          sed -i 's/^SAAS_OWNER_PASSWORD=.*/SAAS_OWNER_PASSWORD=ci_owner/' .env
+          sed -i 's/^SAAS_APP_PASSWORD=.*/SAAS_APP_PASSWORD=ci_app/' .env
+          sed -i 's/^SAAS_AI_PASSWORD=.*/SAAS_AI_PASSWORD=ci_ai/' .env
+          sed -i 's|^ConnectionStrings__Migrations=.*|ConnectionStrings__Migrations=Host=postgres;Port=5432;Database=saas;Username=saas_owner;Password=ci_owner|' .env
+          sed -i 's|^ConnectionStrings__DefaultConnection=.*|ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=saas;Username=saas_app;Password=ci_app|' .env
+          sed -i 's|^AI_DATABASE_URL=.*|AI_DATABASE_URL=postgresql://saas_ai:ci_ai@postgres:5432/saas|' .env
+          sed -i 's/^OIDC_CLIENT_SECRET=.*/OIDC_CLIENT_SECRET=ci_client/' .env
+          sed -i 's/^AUTH_SECRET=.*/AUTH_SECRET=ci_auth_secret_not_used_in_production/' .env
+          sed -i 's/^OIDC_SIGNING_CERT_PASSWORD=.*/OIDC_SIGNING_CERT_PASSWORD=ci_cert/' .env
+          sed -i 's/^OIDC_ENCRYPTION_CERT_PASSWORD=.*/OIDC_ENCRYPTION_CERT_PASSWORD=ci_cert/' .env
+
+      - name: Generate signing certificates
+        run: |
+          mkdir -p certs
+          for name in signing encryption; do
+            openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes \
+              -keyout "certs/$name.key" -out "certs/$name.crt" -subj "/CN=CI $name"
+            openssl pkcs12 -export -out "certs/$name.pfx" \
+              -inkey "certs/$name.key" -in "certs/$name.crt" \
+              -passout pass:ci_cert \
+              -keypbe AES-256-CBC -certpbe AES-256-CBC -macalg sha256
+            rm "certs/$name.key" "certs/$name.crt"
+          done
+
+      - name: Start the stack
+        run: docker compose up -d --build postgres auth api ai redis
+
+      - name: Wait for health
+        run: |
+          for _ in $(seq 1 60); do
+            unhealthy=$(docker compose ps --format '{{.Health}}' | grep -cv healthy || true)
+            [ "$unhealthy" = "0" ] && echo "all healthy" && exit 0
+            sleep 5
+          done
+          echo "services did not become healthy"
+          docker compose ps
+          docker compose logs --tail 80
+          exit 1
+
+      - name: Integration tests
+        run: dotnet test src/Saas.Api.Tests --configuration Release --no-build
+
+      - name: Service logs on failure
+        if: failure()
+        run: docker compose logs --tail 200
+
+  web:
+    name: Frontend typecheck, lint and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/saas-web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/saas-web/package-lock.json
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          # Placeholders: these are read per request at runtime, but the build
+          # imports modules that validate their presence.
+          AUTH_SECRET: ci_build_placeholder
+          AUTH_ISSUER_INTERNAL: http://auth:8080
+          API_URL_INTERNAL: http://api:8080
+          OIDC_CLIENT_SECRET: ci_build_placeholder
+
+  ai:
+    name: AI service lint and format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/saas-ai
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/ruff-action@v3
+        with:
+          src: src/saas-ai/app
+
+      - name: Format check
+        run: ruff format --check app/

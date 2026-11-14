@@ -1,0 +1,29 @@
+# Without this, the host's bin/ and obj/ are copied into the build context and
+# `dotnet publish --no-restore` reuses a project.assets.json that points at
+# Windows-only package folders, failing with a confusing ResolvePackageAssets
+# error inside the container.
+**/bin/
+**/obj/
+**/node_modules/
+**/.next/
+**/dist/
+**/__pycache__/
+**/.venv/
+**/.pytest_cache/
+**/.ruff_cache/
+
+.git/
+.github/
+.vs/
+.idea/
+.claude/
+
+# Secrets and local state never belong in an image.
+.env
+.env.local
+certs/*.pfx
+certs/*.pem
+certs/*.key
+
+**/*.md
+docs/

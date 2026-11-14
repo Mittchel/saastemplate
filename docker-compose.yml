@@ -1,0 +1,253 @@
+# ---------------------------------------------------------------------------
+# Base stack. Everything is a plain container: this same file shape runs on a
+# laptop, on a single Hetzner box, or behind a managed ingress later.
+#
+# Exposure is controlled by `traefik.enable` labels, not by network topology --
+# a service without that label has no public route. To take the AI service off
+# the internet entirely, set its label to false; the .NET API still reaches it
+# on the internal network.
+# ---------------------------------------------------------------------------
+name: ${COMPOSE_PROJECT_NAME:-saas}
+
+services:
+  traefik:
+    image: traefik:v3.7.15
+    restart: unless-stopped
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    ports:
+      - "${PORT_HTTP:-80}:80"
+    volumes:
+      - ./gateway/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [saas]
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SAAS_OWNER_PASSWORD: ${SAAS_OWNER_PASSWORD}
+      SAAS_APP_PASSWORD: ${SAAS_APP_PASSWORD}
+      SAAS_AI_PASSWORD: ${SAAS_AI_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./src/Saas.Data/scripts:/docker-entrypoint-initdb.d:ro
+    networks: [saas]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    networks: [saas]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Local SMTP sink. Production swaps in a real provider via Mail__* settings.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    networks: [saas]
+    environment:
+      MP_MAX_MESSAGES: 500
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  auth:
+    build:
+      context: .
+      dockerfile: src/Saas.Auth.Api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres: {condition: service_healthy}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_HTTP_PORTS: 8080
+      # Non-owner role, same as the resource API: the identity service reads
+      # memberships through the row-level security policies rather than around
+      # them. Schema migration is the resource API's job.
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection}
+      OpenIddict__Issuer: ${AUTH_PUBLIC_URL}/
+      OpenIddict__SigningCertificatePath: ${OIDC_SIGNING_CERT_PATH}
+      OpenIddict__SigningCertificatePassword: ${OIDC_SIGNING_CERT_PASSWORD}
+      OpenIddict__EncryptionCertificatePath: ${OIDC_ENCRYPTION_CERT_PATH}
+      OpenIddict__EncryptionCertificatePassword: ${OIDC_ENCRYPTION_CERT_PASSWORD}
+      OpenIddict__Clients__0__ClientId: ${OIDC_CLIENT_ID}
+      OpenIddict__Clients__0__ClientSecret: ${OIDC_CLIENT_SECRET}
+      Features__Organizations: ${FEATURE_ORGS}
+      Features__PublicSignup: ${FEATURE_PUBLIC_SIGNUP:-true}
+      # Same value the frontend uses for the OAuth dance. The identity service
+      # needs it as the expected audience when it verifies the ID token, so one
+      # variable keeps the two halves from being configured independently.
+      ExternalLogin__Google__ClientId: ${AUTH_GOOGLE_ID}
+      Platform__AdministratorEmail: ${PLATFORM_ADMIN_EMAIL}
+      App__WebUrl: ${WEB_PUBLIC_URL}
+      Mail__Host: mailpit
+      Mail__Port: 1025
+    volumes:
+      - ./certs:/certs:ro
+    networks: [saas]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.auth.rule=Host(`${AUTH_HOST}`)
+      - traefik.http.services.auth.loadbalancer.server.port=8080
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Saas.Api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      # Postgres only. The identity service waits for the schema this service
+      # creates, so depending on it here would deadlock a fresh volume: each
+      # would be waiting for the other.
+      postgres: {condition: service_healthy}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_HTTP_PORTS: 8080
+      # Runtime uses the non-owner role so RLS is enforced.
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection}
+      # Migrations run as the owner.
+      ConnectionStrings__Migrations: ${ConnectionStrings__Migrations}
+      Authentication__Authority: ${AUTH_INTERNAL_URL}
+      Authentication__PublicAuthority: ${AUTH_PUBLIC_URL}
+      Features__Organizations: ${FEATURE_ORGS}
+      Features__PublicSignup: ${FEATURE_PUBLIC_SIGNUP:-true}
+      Ai__BaseUrl: ${AI_INTERNAL_URL}
+      Ai__DefaultModel: ${AI_DEFAULT_MODEL:-gpt-6.1-sol}
+      App__WebUrl: ${WEB_PUBLIC_URL}
+      Mail__Host: mailpit
+      Mail__Port: 1025
+    networks: [saas]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`${API_HOST}`) && !PathPrefix(`/ai`)
+      - traefik.http.services.api.loadbalancer.server.port=8080
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  ai:
+    build:
+      context: ./src/saas-ai
+    restart: unless-stopped
+    depends_on:
+      postgres: {condition: service_healthy}
+      auth: {condition: service_healthy}
+    environment:
+      AI_DATABASE_URL: ${AI_DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      AUTH_ISSUER: ${AUTH_INTERNAL_URL}
+      AUTH_PUBLIC_ISSUER: ${AUTH_PUBLIC_URL}
+      API_BASE_URL: ${API_INTERNAL_URL}
+      AI_PROVIDER: ${AI_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      AI_DEFAULT_MODEL: ${AI_DEFAULT_MODEL:-gpt-6.1-sol}
+    networks: [saas]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ai.rule=Host(`${API_HOST}`) && PathPrefix(`/ai`)
+      - traefik.http.routers.ai.middlewares=ai-stripprefix
+      - traefik.http.middlewares.ai-stripprefix.stripprefix.prefixes=/ai
+      - traefik.http.services.ai.loadbalancer.server.port=8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Same image as `ai`, different entrypoint. Nothing is queued in v1; this is
+  # wired so document ingestion / embeddings drop in without new plumbing.
+  worker:
+    build:
+      context: ./src/saas-ai
+    restart: unless-stopped
+    command: ["arq", "app.worker.WorkerSettings"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    environment:
+      AI_DATABASE_URL: ${AI_DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      AUTH_ISSUER: ${AUTH_INTERNAL_URL}
+      API_BASE_URL: ${API_INTERNAL_URL}
+      AI_PROVIDER: ${AI_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      AI_DEFAULT_MODEL: ${AI_DEFAULT_MODEL:-gpt-6.1-sol}
+    networks: [saas]
+
+  web:
+    build:
+      context: ./src/saas-web
+      args:
+        NEXT_PUBLIC_API_URL: ${API_PUBLIC_URL}
+    restart: unless-stopped
+    depends_on:
+      api: {condition: service_healthy}
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_URL: ${WEB_PUBLIC_URL}
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
+      AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID}
+      AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET}
+      # Server-side calls stay on the internal network; the browser uses the
+      # public hostnames.
+      AUTH_ISSUER_INTERNAL: ${AUTH_INTERNAL_URL}
+      API_URL_INTERNAL: ${API_INTERNAL_URL}
+      AI_URL_INTERNAL: ${AI_INTERNAL_URL}
+      NEXT_PUBLIC_API_URL: ${API_PUBLIC_URL}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+    networks: [saas]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.web.rule=Host(`${WEB_HOST}`)
+      - traefik.http.services.web.loadbalancer.server.port=3000
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+networks:
+  saas:
+    # Explicit name so Docker does not prefix it with the project name.
+    # Traefik's docker provider filters on the real network name, and a
+    # mismatch silently yields 404s on every route rather than an error.
+    name: saas
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:

@@ -1,0 +1,123 @@
+# ---------------------------------------------------------------------------
+# Production overlay. Applied on top of the base file, never alone:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Note that `docker compose up` on its own picks up docker-compose.override.yml
+# instead, which publishes database ports and runs the services in Development.
+# Naming both files explicitly is what excludes it.
+#
+# Before the first deploy:
+#   * point WEB_HOST / API_HOST / AUTH_HOST at real domains with DNS pointing here
+#   * set ACME_EMAIL
+#   * generate real signing certificates and set their passwords
+#   * set strong POSTGRES/SAAS_* passwords and a fresh AUTH_SECRET
+# ---------------------------------------------------------------------------
+services:
+  traefik:
+    command:
+      - --configFile=/etc/traefik/traefik.prod.yml
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./gateway/traefik/traefik.prod.yml:/etc/traefik/traefik.prod.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL}
+
+  postgres:
+    # No published port. The database is reachable only on the container
+    # network; reach it for maintenance with `docker compose exec`, or an SSH
+    # tunnel, rather than by exposing 5432 to the internet.
+    restart: always
+
+  redis:
+    restart: always
+
+  # Mailpit is a development mail sink that accepts anything and shows it in a
+  # web UI. Running it in production would silently swallow every password
+  # reset, so it is scaled to zero and Mail__* must point at a real provider.
+  mailpit:
+    deploy:
+      replicas: 0
+
+  auth:
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # Production refuses to start without real certificates rather than
+      # falling back to the ephemeral development ones.
+      OpenIddict__Issuer: https://${AUTH_HOST}/
+      App__WebUrl: https://${WEB_HOST}
+      Mail__Host: ${MAIL_HOST}
+      Mail__Port: ${MAIL_PORT:-587}
+      Mail__Username: ${MAIL_USERNAME}
+      Mail__Password: ${MAIL_PASSWORD}
+      Mail__UseSsl: "true"
+      Mail__FromAddress: ${MAIL_FROM_ADDRESS}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.auth.rule=Host(`${AUTH_HOST}`)
+      - traefik.http.routers.auth.entrypoints=websecure
+      - traefik.http.routers.auth.tls.certresolver=le
+      - traefik.http.services.auth.loadbalancer.server.port=8080
+
+  api:
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Authentication__PublicAuthority: https://${AUTH_HOST}
+      Authentication__RequireHttpsMetadata: "true"
+      App__WebUrl: https://${WEB_HOST}
+      Cors__Origins__0: https://${WEB_HOST}
+      Mail__Host: ${MAIL_HOST}
+      Mail__Port: ${MAIL_PORT:-587}
+      Mail__Username: ${MAIL_USERNAME}
+      Mail__Password: ${MAIL_PASSWORD}
+      Mail__UseSsl: "true"
+      Mail__FromAddress: ${MAIL_FROM_ADDRESS}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`${API_HOST}`) && !PathPrefix(`/ai`)
+      - traefik.http.routers.api.entrypoints=websecure
+      - traefik.http.routers.api.tls.certresolver=le
+      - traefik.http.services.api.loadbalancer.server.port=8080
+
+  ai:
+    restart: always
+    environment:
+      AUTH_PUBLIC_ISSUER: https://${AUTH_HOST}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ai.rule=Host(`${API_HOST}`) && PathPrefix(`/ai`)
+      - traefik.http.routers.ai.entrypoints=websecure
+      - traefik.http.routers.ai.tls.certresolver=le
+      - traefik.http.routers.ai.middlewares=ai-stripprefix
+      - traefik.http.middlewares.ai-stripprefix.stripprefix.prefixes=/ai
+      - traefik.http.services.ai.loadbalancer.server.port=8000
+
+  worker:
+    restart: always
+
+  web:
+    restart: always
+    build:
+      args:
+        # Baked into the browser bundle at build time, so it has to be the
+        # public HTTPS origin, not the internal one.
+        NEXT_PUBLIC_API_URL: https://${API_HOST}
+    environment:
+      NODE_ENV: production
+      AUTH_URL: https://${WEB_HOST}
+      NEXT_PUBLIC_API_URL: https://${API_HOST}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.web.rule=Host(`${WEB_HOST}`)
+      - traefik.http.routers.web.entrypoints=websecure
+      - traefik.http.routers.web.tls.certresolver=le
+      - traefik.http.services.web.loadbalancer.server.port=3000
+
+volumes:
+  letsencrypt:

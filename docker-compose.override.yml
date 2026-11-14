@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# Development overrides. Applied automatically by `docker compose up`.
+#
+# Publishes direct host ports alongside Traefik routing. Browsers resolve
+# *.localhost themselves, but Windows DNS does not -- so curl, psql and any
+# IDE tooling use these ports instead of the Traefik hostnames.
+# ---------------------------------------------------------------------------
+services:
+  traefik:
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+      - --api.insecure=true
+      - --log.level=DEBUG
+    ports:
+      - "${PORT_TRAEFIK_DASHBOARD:-8080}:8080"
+
+  postgres:
+    ports:
+      - "${PORT_POSTGRES:-5432}:5432"
+
+  redis:
+    ports:
+      - "${PORT_REDIS:-6379}:6379"
+
+  mailpit:
+    ports:
+      - "${PORT_MAILPIT_UI:-8025}:8025"
+
+  auth:
+    ports:
+      - "${PORT_AUTH:-5001}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Logging__LogLevel__Default: Information
+
+  api:
+    ports:
+      - "${PORT_API:-5002}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Logging__LogLevel__Default: Information
+
+  ai:
+    ports:
+      - "${PORT_AI:-5003}:8000"
+    environment:
+      AI_RELOAD: "true"
+      LOG_LEVEL: debug
+    volumes:
+      - ./src/saas-ai/app:/srv/app:ro
+
+  web:
+    ports:
+      - "${PORT_WEB:-3000}:3000"
+    environment:
+      NODE_ENV: development

@@ -1,0 +1,14 @@
+{
+  "//": "Points at the running docker compose stack. These are the host ports published by docker-compose.override.yml.",
+  "AuthBaseUrl": "http://localhost:5001",
+  "ApiBaseUrl": "http://localhost:5002",
+  "AiBaseUrl": "http://localhost:5003",
+  "Postgres": "Host=localhost;Port=15432;Database=saas;Username=saas_app;Password=devapp",
+  "PostgresOwner": "Host=localhost;Port=15432;Database=saas;Username=saas_owner;Password=devowner",
+  "ClientId": "saas-web",
+  "ClientSecret": "devclient",
+  "DevUserEmail": "dev@saas.local",
+  "DevUserPassword": "DevPassword123",
+  "MemberUserEmail": "member@saas.local",
+  "MemberUserPassword": "DevPassword123"
+}

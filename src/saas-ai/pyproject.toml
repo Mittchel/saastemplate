@@ -1,0 +1,49 @@
+[project]
+name = "saas-ai"
+version = "0.1.0"
+description = "Streaming LangGraph agent service."
+requires-python = ">=3.13"
+
+dependencies = [
+    "fastapi>=0.120",
+    "uvicorn[standard]>=0.38",
+    "sse-starlette>=3.0",
+    "pydantic>=2.12",
+    "pydantic-settings>=2.12",
+    "httpx>=0.28",
+    "pyjwt[crypto]>=2.10",
+    "langgraph>=1.0",
+    "langchain-anthropic>=1.0",
+    "langchain-openai>=1.7",
+    "langgraph-checkpoint-postgres>=3.2",
+    "psycopg[binary,pool]>=3.2",
+    "arq>=0.26",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4",
+    "pytest-asyncio>=1.2",
+    "ruff>=0.14",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.ruff.lint.flake8-bugbear]
+# Calling Depends() in an argument default is the FastAPI idiom, not the
+# mutable-default bug B008 exists to catch.
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Header",
+    "fastapi.Body",
+]

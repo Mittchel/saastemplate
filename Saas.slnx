@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Saas.Api.Tests/Saas.Api.Tests.csproj" />
+    <Project Path="src/Saas.Api/Saas.Api.csproj" />
+    <Project Path="src/Saas.Auth.Api/Saas.Auth.Api.csproj" />
+    <Project Path="src/Saas.Business/Saas.Business.csproj" />
+    <Project Path="src/Saas.Core/Saas.Core.csproj" />
+    <Project Path="src/Saas.Data/Saas.Data.csproj" />
+  </Folder>
+</Solution>

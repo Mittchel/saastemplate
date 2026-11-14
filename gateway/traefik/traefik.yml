@@ -1,0 +1,42 @@
+# ---------------------------------------------------------------------------
+# Traefik static configuration.
+#
+# Deliberately no compression middleware: gzip on a text/event-stream will
+# buffer the AI service's tokens and silently turn streaming into one blob.
+# ---------------------------------------------------------------------------
+entryPoints:
+  web:
+    address: ":80"
+
+api:
+  dashboard: true
+
+ping: {}
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: saas
+    watch: true
+
+log:
+  level: INFO
+  format: common
+
+accessLog:
+  format: common
+  filters:
+    statusCodes:
+      - "400-599"
+
+# --- Production TLS --------------------------------------------------------
+# Uncomment, set a real domain and email, and add a `websecure` entrypoint on
+# :443 plus `traefik.http.routers.<name>.tls.certresolver=le` labels.
+#
+# certificatesResolvers:
+#   le:
+#     acme:
+#       email: you@example.com
+#       storage: /letsencrypt/acme.json
+#       httpChallenge:
+#         entryPoint: web

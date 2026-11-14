@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# Traefik, production. Used by docker-compose.prod.yml.
+#
+# Differences from the development config: a TLS entrypoint with automatic
+# Let's Encrypt certificates, a permanent redirect from http, and no dashboard.
+# ---------------------------------------------------------------------------
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: le
+
+# The dashboard is deliberately absent: the development config exposes it
+# without authentication, which must not follow the stack into production.
+api:
+  dashboard: false
+
+ping: {}
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: saas
+    watch: true
+
+log:
+  level: WARN
+  format: json
+
+accessLog:
+  format: json
+  filters:
+    statusCodes:
+      - "400-599"
+
+certificatesResolvers:
+  le:
+    acme:
+      email: "{{ env \"ACME_EMAIL\" }}"
+      storage: /letsencrypt/acme.json
+      httpChallenge:
+        entryPoint: web
+
+# No compression middleware, for the same reason as in development: gzip over
+# a text/event-stream buffers the agent's tokens and turns streaming into one
+# delayed blob.
