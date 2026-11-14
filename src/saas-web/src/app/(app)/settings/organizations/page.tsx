@@ -37,7 +37,9 @@ export default async function OrganizationsPage() {
                   <span className="text-muted-foreground"> · personal</span>
                 ) : null}
               </span>
-              <span className="text-muted-foreground">{organization.role}</span>
+              {organization.role ? (
+                <span className="text-muted-foreground">{organization.role}</span>
+              ) : null}
             </div>
           ))}
         </CardContent>

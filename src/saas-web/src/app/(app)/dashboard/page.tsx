@@ -13,7 +13,8 @@ export default async function DashboardPage() {
           Welcome back, {user.fullName || user.email}
         </h1>
         <p className="text-muted-foreground text-sm">
-          You are working in {user.organization.name} as {user.organizationRole}.
+          You are working in {user.organization.name}
+          {user.organizationRole ? ` as ${user.organizationRole}` : ""}.
         </p>
       </div>
 

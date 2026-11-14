@@ -72,9 +72,11 @@ export function OrgSwitcher({
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{active.name}</span>
-              <span className="truncate text-xs text-muted-foreground">
-                {active.isPersonal ? "Personal workspace" : active.role}
-              </span>
+              {active.isPersonal || active.role ? (
+                <span className="truncate text-xs text-muted-foreground">
+                  {active.isPersonal ? "Personal workspace" : active.role}
+                </span>
+              ) : null}
             </div>
             <ChevronsUpDownIcon className="ml-auto size-4" />
           </DropdownMenuTrigger>

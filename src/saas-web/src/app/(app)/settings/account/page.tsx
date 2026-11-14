@@ -24,7 +24,8 @@ export default async function AccountPage() {
         <CardHeader>
           <CardTitle className="text-base">Workspace</CardTitle>
           <CardDescription>
-            {user.organization.name} — you are {user.organizationRole}.
+            {user.organization.name}
+            {user.organizationRole ? ` — you are ${user.organizationRole}.` : "."}
           </CardDescription>
         </CardHeader>
       </Card>
