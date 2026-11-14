@@ -99,22 +99,38 @@ public static class TestHosts
 
     public static async Task StopAsync()
     {
-        if (_auth is not null)
+        try
         {
-            await _auth.DisposeAsync();
+            try
+            {
+                if (_auth is not null)
+                {
+                    await _auth.DisposeAsync();
+                }
+            }
+            finally
+            {
+                try
+                {
+                    if (_api is not null)
+                    {
+                        await _api.DisposeAsync();
+                    }
+                }
+                finally
+                {
+                    if (_postgres is not null)
+                    {
+                        await _postgres.DisposeAsync();
+                    }
+                }
+            }
         }
-
-        if (_api is not null)
+        finally
         {
-            await _api.DisposeAsync();
+            // Always remove the temporary certificate folder, even if a disposal above threw.
+            _certificates?.Dispose();
         }
-
-        if (_postgres is not null)
-        {
-            await _postgres.DisposeAsync();
-        }
-
-        _certificates?.Dispose();
     }
 
     /// <summary>Runs the repository's own init script, so the roles are never re-declared here.</summary>
