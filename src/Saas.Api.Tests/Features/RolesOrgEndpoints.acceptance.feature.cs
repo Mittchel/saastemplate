@@ -18,11 +18,11 @@ namespace Saas.Api.Tests.Features
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::NUnit.Framework.TestFixtureAttribute()]
-    [global::NUnit.Framework.DescriptionAttribute("Organization endpoints are guarded by permissions only")]
+    [global::NUnit.Framework.DescriptionAttribute("Permission-only organisation endpoints")]
     [global::NUnit.Framework.FixtureLifeCycleAttribute(global::NUnit.Framework.LifeCycle.InstancePerTestCase)]
     [global::NUnit.Framework.CategoryAttribute("MVP-01")]
     [global::NUnit.Framework.CategoryAttribute("RB-ACCESS-01")]
-    public partial class OrganizationEndpointsAreGuardedByPermissionsOnlyFeature
+    public partial class Permission_OnlyOrganisationEndpointsFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
@@ -31,10 +31,10 @@ namespace Saas.Api.Tests.Features
                 "MVP-01",
                 "RB-ACCESS-01"};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Organization endpoints are guarded by permissions only", "  Permission policies are the only access rule, and a foreign organization id ans" +
-                "wers 404.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Permission-only organisation endpoints", "  Organisation endpoints are guarded by permissions only, and a foreign organisat" +
+                "ion id answers 404.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
-#line 1 "OrgEndpointPermissions.acceptance.feature"
+#line 1 "RolesOrgEndpoints.acceptance.feature"
 #line hidden
         
         [global::NUnit.Framework.OneTimeSetUpAttribute()]
@@ -110,17 +110,19 @@ namespace Saas.Api.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/OrgEndpointPermissions.acceptance.feature.ndjson", 8);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/RolesOrgEndpoints.acceptance.feature.ndjson", 8);
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 1 - a foreign organization id on the member list answers 404")]
-        public async global::System.Threading.Tasks.Task Criterion1_AForeignOrganizationIdOnTheMemberListAnswers404()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 1 - the development user gets 404 listing the members of another organi" +
+            "sation")]
+        public async global::System.Threading.Tasks.Task Criterion1_TheDevelopmentUserGets404ListingTheMembersOfAnotherOrganisation()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 1 - a foreign organization id on the member list answers 404", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 1 - the development user gets 404 listing the members of another organi" +
+                    "sation", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 5
@@ -134,26 +136,28 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 6
-    await testRunner.GivenAsync("dia122 the development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the endpoint caller is the development user and knows another organisation\'s id", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 7
-    await testRunner.WhenAsync("dia122 the development user lists the members of another organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the endpoint caller lists the members of the other organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 8
-    await testRunner.ThenAsync("dia122 the answer is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the endpoint answer is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 2 - a foreign organization id on a role update answers 404")]
-        public async global::System.Threading.Tasks.Task Criterion2_AForeignOrganizationIdOnARoleUpdateAnswers404()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 2 - the development user gets 404 updating a member of another organisa" +
+            "tion")]
+        public async global::System.Threading.Tasks.Task Criterion2_TheDevelopmentUserGets404UpdatingAMemberOfAnotherOrganisation()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "1";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 2 - a foreign organization id on a role update answers 404", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 2 - the development user gets 404 updating a member of another organisa" +
+                    "tion", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 10
@@ -167,26 +171,29 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 11
-    await testRunner.GivenAsync("dia122 the development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the endpoint caller is the development user and knows another organisation\'s id", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 12
-    await testRunner.WhenAsync("dia122 the development user sets a member role in another organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the endpoint caller sets the role of a user to \"Member\" in the other organisation" +
+                        "", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 13
-    await testRunner.ThenAsync("dia122 the answer is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the endpoint answer is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 3 - a Member cannot list members but the development user can")]
-        public async global::System.Threading.Tasks.Task Criterion3_AMemberCannotListMembersButTheDevelopmentUserCan()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 3 - a Member is refused the member list while the development user gets" +
+            " it")]
+        public async global::System.Threading.Tasks.Task Criterion3_AMemberIsRefusedTheMemberListWhileTheDevelopmentUserGetsIt()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 3 - a Member cannot list members but the development user can", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 3 - a Member is refused the member list while the development user gets" +
+                    " it", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 15
@@ -200,33 +207,33 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 16
-    await testRunner.GivenAsync("dia122 the member holds role value 0 in the development organization and is switc" +
-                        "hed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the endpoint member holds role 0 in the development organisation and is switched " +
+                        "in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 17
-    await testRunner.WhenAsync("dia122 the member lists the members of the active organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the endpoint member lists the members of the active organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 18
-    await testRunner.ThenAsync("dia122 the answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the endpoint answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 19
-    await testRunner.WhenAsync("dia122 the development user lists the members of the development organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the endpoint development user lists the members of the active organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 20
-    await testRunner.ThenAsync("dia122 the answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the endpoint answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 4 - a Member cannot update roles or list invitations")]
-        public async global::System.Threading.Tasks.Task Criterion4_AMemberCannotUpdateRolesOrListInvitations()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 4 - a Member is refused member updates and the invitation list")]
+        public async global::System.Threading.Tasks.Task Criterion4_AMemberIsRefusedMemberUpdatesAndTheInvitationList()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 4 - a Member cannot update roles or list invitations", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 4 - a Member is refused member updates and the invitation list", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 22
@@ -240,33 +247,33 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 23
-    await testRunner.GivenAsync("dia122 the member holds role value 0 in the development organization and is switc" +
-                        "hed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the endpoint member holds role 0 in the development organisation and is switched " +
+                        "in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 24
-    await testRunner.WhenAsync("dia122 the member updates a role in the active organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the endpoint member updates its own role to \"Member\" in the active organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 25
-    await testRunner.ThenAsync("dia122 the answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the endpoint answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 26
-    await testRunner.WhenAsync("dia122 the member lists the invitations of the active organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the endpoint member lists the invitations of the active organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 27
-    await testRunner.ThenAsync("dia122 the answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the endpoint answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 5 - a promoted member can list members with the same token")]
-        public async global::System.Threading.Tasks.Task Criterion5_APromotedMemberCanListMembersWithTheSameToken()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 5 - a promoted member gets the member list with the same token")]
+        public async global::System.Threading.Tasks.Task Criterion5_APromotedMemberGetsTheMemberListWithTheSameToken()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "4";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 5 - a promoted member can list members with the same token", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 5 - a promoted member gets the member list with the same token", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 29
@@ -280,39 +287,39 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 30
-    await testRunner.GivenAsync("dia122 the member holds role value 0 in the development organization and is switc" +
-                        "hed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the endpoint member holds role 0 in the development organisation and is switched " +
+                        "in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 31
-    await testRunner.WhenAsync("dia122 the member lists the members of the active organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the endpoint member lists the members of the active organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 32
-    await testRunner.ThenAsync("dia122 the answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the endpoint answer is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 33
-    await testRunner.WhenAsync("dia122 the development user promotes the member to Admin", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the endpoint development user promotes the member to \"Admin\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 34
-    await testRunner.ThenAsync("dia122 the answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the endpoint answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 35
-    await testRunner.WhenAsync("dia122 the member lists the members of the active organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the endpoint member lists the members of the active organisation", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 36
-    await testRunner.ThenAsync("dia122 the answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the endpoint answer is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 6 - the development user has the new permissions")]
-        public async global::System.Threading.Tasks.Task Criterion6_TheDevelopmentUserHasTheNewPermissions()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 6 - the development user\'s profile lists the new permissions")]
+        public async global::System.Threading.Tasks.Task Criterion6_TheDevelopmentUsersProfileListsTheNewPermissions()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "5";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 6 - the development user has the new permissions", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 6 - the development user\'s profile lists the new permissions", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 38
@@ -326,14 +333,13 @@ namespace Saas.Api.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 39
-    await testRunner.GivenAsync("dia122 the development user is signed in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the endpoint caller is the development user and knows another organisation\'s id", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 40
-    await testRunner.WhenAsync("dia122 the development user requests their profile", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the endpoint caller requests its profile", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 41
-    await testRunner.ThenAsync("dia122 the profile lists the permissions invitation.manage, team.read and profile" +
-                        ".own", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the endpoint profile lists \"invitation.manage\", \"team.read\" and \"profile.own\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

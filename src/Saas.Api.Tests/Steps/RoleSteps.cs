@@ -111,10 +111,11 @@ public class RoleSteps(
     public async Task ChangeRoleInAnotherOrganization()
     {
         var foreignId = await ForeignOrganizationIdAsync();
-        // A real member of the development user's organization, so only the
-        // organization check can produce the 404.
+        // The development user's own id: a real member of its organization, so only the
+        // organization check can produce the 404 (without it the call would reach the last-Owner rule).
+        var userId = AuthDriver.ReadClaim(_devTokens!.AccessToken, "sub");
         var response = await devApi.PutAsync(
-            $"/organizations/{foreignId}/members/{_memberUserId}", new { role = "Member" });
+            $"/organizations/{foreignId}/members/{userId}", new { role = "Member" });
 
         context.LastStatusCode = (int)response.StatusCode;
     }
