@@ -1,5 +1,4 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
+using System.Text.Json;
 using Reqnroll;
 using Saas.Api.Tests.Contexts;
 using Saas.Api.Tests.Drivers;
@@ -132,10 +131,28 @@ public class RoleSteps(
         // The development user's own id, a real member of its organization, so only the
         // organization check can produce the 404.
         var userId = AuthDriver.ReadClaim(_devTokens!.AccessToken, "sub");
-        using var client = TestHosts.CreateApiClient();
-        client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", _devTokens!.AccessToken);
-        var response = await client.DeleteAsync($"/organizations/{foreignId}/members/{userId}");
+        var response = await api.SendAsAsync(
+            _devTokens!.AccessToken, HttpMethod.Delete, $"/organizations/{foreignId}/members/{userId}");
+
+        context.LastStatusCode = (int)response.StatusCode;
+        _lastBody = await response.Content.ReadAsStringAsync();
+    }
+
+    [When("I send {word} to another organization's {string}")]
+    public async Task SendToAnotherOrganization(string method, string suffix)
+    {
+        var foreignId = await ForeignOrganizationIdAsync();
+        object? body = method switch
+        {
+            "PUT" when suffix == "" => new { name = "Renamed" },
+            "POST" => new { email = "nobody@example.com", role = "Member" },
+            _ => null,
+        };
+        var response = await api.SendAsAsync(
+            _devTokens!.AccessToken,
+            new HttpMethod(method),
+            $"/organizations/{foreignId}{suffix}",
+            body);
 
         context.LastStatusCode = (int)response.StatusCode;
         _lastBody = await response.Content.ReadAsStringAsync();
@@ -186,23 +203,13 @@ public class RoleSteps(
         permissions.ShouldContain(permission);
     }
 
-    // A GET as the given caller, on a client of its own so the shared drivers keep their accounts.
-    private static async Task<HttpResponseMessage> GetAsync(string accessToken, string path)
-    {
-        using var client = TestHosts.CreateApiClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+    // A GET as the given caller, so the shared driver keeps its account.
+    private Task<HttpResponseMessage> GetAsync(string accessToken, string path) =>
+        api.SendAsAsync(accessToken, HttpMethod.Get, path);
 
-        return await client.GetAsync(path);
-    }
-
-    // A PUT as the given caller, on a client of its own so the shared drivers keep their accounts.
-    private static async Task<HttpResponseMessage> PutAsync(string accessToken, string path, object body)
-    {
-        using var client = TestHosts.CreateApiClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-        return await client.PutAsJsonAsync(path, body);
-    }
+    // A PUT as the given caller, so the shared driver keeps its account.
+    private Task<HttpResponseMessage> PutAsync(string accessToken, string path, object body) =>
+        api.SendAsAsync(accessToken, HttpMethod.Put, path, body);
 
     // The ordinary account's own personal organization stands in for "somebody else's".
     private async Task<Guid> ForeignOrganizationIdAsync()
@@ -217,7 +224,7 @@ public class RoleSteps(
                 .ShouldNotBeNull("could not sign in as the ordinary account");
         using var listing = await GetAsync(tokens.AccessToken, "/organizations");
         listing.EnsureSuccessStatusCode();
-        using var organizations = System.Text.Json.JsonDocument.Parse(await listing.Content.ReadAsStringAsync());
+        using var organizations = JsonDocument.Parse(await listing.Content.ReadAsStringAsync());
 
         _foreignOrganizationId = organizations.RootElement.EnumerateArray()
             .First(o => o.GetProperty("isPersonal").GetBoolean())

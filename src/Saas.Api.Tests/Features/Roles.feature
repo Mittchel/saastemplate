@@ -46,6 +46,24 @@ Feature: Roles
         Then the response status is 404
         And the error names "Organization"
 
+    Scenario: The other organization endpoints answer 404 for another organization's id
+        Given the development user is signed in as a second caller
+        When I send PUT to another organization's ""
+        Then the response status is 404
+        And the error names "Organization"
+        When I send DELETE to another organization's ""
+        Then the response status is 404
+        And the error names "Organization"
+        When I send GET to another organization's "/invitations"
+        Then the response status is 404
+        And the error names "Organization"
+        When I send POST to another organization's "/invitations"
+        Then the response status is 404
+        And the error names "Organization"
+        When I send DELETE to another organization's "/invitations/00000000-0000-0000-0000-000000000001"
+        Then the response status is 404
+        And the error names "Organization"
+
     Scenario: A member cannot manage members until promoted, and the promotion applies to the same token
         Given an ordinary account has been switched into the development user's organization
         And the development user is signed in as a second caller

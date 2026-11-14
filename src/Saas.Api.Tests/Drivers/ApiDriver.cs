@@ -17,6 +17,27 @@ public class ApiDriver
     public Task<HttpResponseMessage> PostAsync(string path, object body) =>
         _client.PostAsJsonAsync(path, body);
 
+    /// <summary>
+    /// Sends one request as the caller holding <paramref name="accessToken"/>, leaving the
+    /// driver's own authenticated user untouched.
+    /// </summary>
+    public async Task<HttpResponseMessage> SendAsAsync(
+        string accessToken,
+        HttpMethod method,
+        string path,
+        object? body = null)
+    {
+        using var request = new HttpRequestMessage(method, path);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        if (body is not null)
+        {
+            request.Content = JsonContent.Create(body);
+        }
+
+        return await _client.SendAsync(request);
+    }
+
     public async Task<JsonDocument> GetJsonAsync(string path)
     {
         var response = await _client.GetAsync(path);
