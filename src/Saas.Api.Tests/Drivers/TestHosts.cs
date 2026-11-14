@@ -37,9 +37,26 @@ public static class TestHosts
     /// <summary>Issuer written into tokens and expected by the API. Never resolved over a network.</summary>
     private const string Issuer = "http://auth.test";
 
+    private static TestCertificates? _certificates;
     private static PostgreSqlContainer? _postgres;
     private static WebApplicationFactory<ApiEntryPoint>? _api;
     private static WebApplicationFactory<AuthEntryPoint>? _auth;
+
+    /// <summary>The temporary folder holding this run's generated certificates, or null when not started.</summary>
+    public static string? CertificateFolder => _certificates?.Folder;
+
+    /// <summary>Path of this run's generated signing <c>.pfx</c>, or null when not started.</summary>
+    public static string? SigningCertificatePath => _certificates?.SigningCertificatePath;
+
+    /// <summary>Path of this run's generated encryption <c>.pfx</c>, or null when not started.</summary>
+    public static string? EncryptionCertificatePath => _certificates?.EncryptionCertificatePath;
+
+    /// <summary>The identity host's services, to inspect the credentials it actually loaded.</summary>
+    public static IServiceProvider AuthServices =>
+        (_auth ?? throw new InvalidOperationException("Test hosts are not started.")).Services;
+
+    /// <summary>Password of this run's generated <c>.pfx</c> files, or null when not started.</summary>
+    public static string? CertificatePassword => _certificates?.Password;
 
     public static string AppConnectionString { get; private set; } = string.Empty;
     public static string OwnerConnectionString { get; private set; } = string.Empty;
@@ -57,27 +74,8 @@ public static class TestHosts
     {
         try
         {
-            _postgres = new PostgreSqlBuilder("pgvector/pgvector:pg17")
-                .WithDatabase(Database)
-                .WithUsername("postgres")
-                .WithPassword(AdminPassword)
-                .Build();
-
-            await _postgres.StartAsync();
-
-            await CreateLoginsAsync(_postgres);
-
-            AppConnectionString = ConnectionString(_postgres, "saas_app", AppPassword);
-            OwnerConnectionString = ConnectionString(_postgres, "saas_owner", OwnerPassword);
-            AiConnectionString = ConnectionString(_postgres, "saas_ai", AiPassword);
-
-            // The API first: its hosted service applies the migrations the identity
-            // service's seeder waits for.
-            _api = new ApiFactory(AppConnectionString, OwnerConnectionString, () => _auth!);
-            _ = _api.Server;
-
-            _auth = new AuthFactory(AppConnectionString, clientId, clientSecret, administratorEmail);
-            _ = _auth.Server;
+            _certificates = await StartWithCertificatesAsync(
+                certificates => StartHostsAsync(certificates, clientId, clientSecret, administratorEmail));
         }
         catch
         {
@@ -94,21 +92,88 @@ public static class TestHosts
         }
     }
 
+    /// <summary>
+    /// Generates the certificates and runs <paramref name="start"/> with them. If it throws, the
+    /// certificate folder is deleted before the failure propagates, so a failed startup leaves no keys behind.
+    /// </summary>
+    internal static async Task<TestCertificates> StartWithCertificatesAsync(Func<TestCertificates, Task> start)
+    {
+        var certificates = TestCertificates.Create();
+        try
+        {
+            await start(certificates);
+            return certificates;
+        }
+        catch
+        {
+            certificates.Dispose();
+            throw;
+        }
+    }
+
+    private static async Task StartHostsAsync(
+        TestCertificates certificates,
+        string clientId,
+        string clientSecret,
+        string administratorEmail)
+    {
+        _postgres = new PostgreSqlBuilder("pgvector/pgvector:pg17")
+            .WithDatabase(Database)
+            .WithUsername("postgres")
+            .WithPassword(AdminPassword)
+            .Build();
+
+        await _postgres.StartAsync();
+
+        await CreateLoginsAsync(_postgres);
+
+        AppConnectionString = ConnectionString(_postgres, "saas_app", AppPassword);
+        OwnerConnectionString = ConnectionString(_postgres, "saas_owner", OwnerPassword);
+        AiConnectionString = ConnectionString(_postgres, "saas_ai", AiPassword);
+
+        // The API first: its hosted service applies the migrations the identity
+        // service's seeder waits for.
+        _api = new ApiFactory(AppConnectionString, OwnerConnectionString, () => _auth!);
+        _ = _api.Server;
+
+        _auth = new AuthFactory(AppConnectionString, certificates, clientId, clientSecret, administratorEmail);
+        _ = _auth.Server;
+    }
+
     public static async Task StopAsync()
     {
-        if (_auth is not null)
+        try
         {
-            await _auth.DisposeAsync();
+            try
+            {
+                if (_auth is not null)
+                {
+                    await _auth.DisposeAsync();
+                }
+            }
+            finally
+            {
+                try
+                {
+                    if (_api is not null)
+                    {
+                        await _api.DisposeAsync();
+                    }
+                }
+                finally
+                {
+                    if (_postgres is not null)
+                    {
+                        await _postgres.DisposeAsync();
+                    }
+                }
+            }
         }
-
-        if (_api is not null)
+        finally
         {
-            await _api.DisposeAsync();
-        }
-
-        if (_postgres is not null)
-        {
-            await _postgres.DisposeAsync();
+            // Always remove the temporary certificate folder, even if a disposal above threw.
+            _certificates?.Dispose();
+            _certificates = null;
         }
     }
 
@@ -188,6 +253,7 @@ public static class TestHosts
 
     private sealed class AuthFactory(
         string appConnectionString,
+        TestCertificates certificates,
         string clientId,
         string clientSecret,
         string administratorEmail) : WebApplicationFactory<AuthEntryPoint>
@@ -197,6 +263,11 @@ public static class TestHosts
             ConfigureCommon(builder, appConnectionString);
 
             builder.UseSetting("OpenIddict:Issuer", Issuer + "/");
+            // Files, so the service never reaches the development certificates in the OS store.
+            builder.UseSetting("OpenIddict:SigningCertificatePath", certificates.SigningCertificatePath);
+            builder.UseSetting("OpenIddict:SigningCertificatePassword", certificates.Password);
+            builder.UseSetting("OpenIddict:EncryptionCertificatePath", certificates.EncryptionCertificatePath);
+            builder.UseSetting("OpenIddict:EncryptionCertificatePassword", certificates.Password);
             builder.UseSetting("OpenIddict:Clients:0:ClientId", clientId);
             builder.UseSetting("OpenIddict:Clients:0:ClientSecret", clientSecret);
             builder.UseSetting("Platform:AdministratorEmail", administratorEmail);
