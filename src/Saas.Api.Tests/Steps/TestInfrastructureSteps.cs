@@ -10,7 +10,7 @@ namespace Saas.Api.Tests.Steps;
 [Binding]
 public class TestInfrastructureSteps
 {
-    private static readonly Lazy<string> RepositoryRoot = new(FindRepositoryRoot);
+    private static readonly Lazy<string> _repositoryRoot = new(FindRepositoryRoot);
 
     [Then("the infra file {string} contains {string}")]
     public void FileContains(string path, string text) =>
@@ -32,12 +32,12 @@ public class TestInfrastructureSteps
             .ShouldBeEmpty($"test sources should not contain \"{text}\"");
 
     private static string ReadFile(string path) =>
-        File.ReadAllText(Path.Combine(RepositoryRoot.Value, path));
+        File.ReadAllText(Path.Combine(_repositoryRoot.Value, path));
 
     /// <summary>The project's hand-written C#: no bin/, obj/ or generated feature code.</summary>
     private static IEnumerable<string> TestSources()
     {
-        var project = Path.Combine(RepositoryRoot.Value, "src", "Saas.Api.Tests");
+        var project = Path.Combine(_repositoryRoot.Value, "src", "Saas.Api.Tests");
         var separator = Path.DirectorySeparatorChar;
 
         return Directory.EnumerateFiles(project, "*.cs", SearchOption.AllDirectories)

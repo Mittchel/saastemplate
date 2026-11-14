@@ -27,7 +27,7 @@ namespace Saas.Api.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Test infrastructure (DIA-128, MVP-02 / RB-ACCESS-01)", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en"), "Features", "Test infrastructure (DIA-128, MVP-02 / RB-ACCESS-01)", "  Integration tests use Testcontainers and in-process hosts.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "TestInfrastructure.acceptance.feature"
 #line hidden
@@ -109,16 +109,16 @@ namespace Saas.Api.Tests.Features
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 1: Postgres runs via Testcontainers with the compose image")]
-        public async global::System.Threading.Tasks.Task Criterion1PostgresRunsViaTestcontainersWithTheComposeImage()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 1: Postgres container from Testcontainers with the compose image")]
+        public async global::System.Threading.Tasks.Task Criterion1PostgresContainerFromTestcontainersWithTheComposeImage()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 1: Postgres runs via Testcontainers with the compose image", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 1: Postgres container from Testcontainers with the compose image", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 3
+#line 4
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -128,29 +128,28 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 4
+#line 5
     await testRunner.ThenAsync("the infra file \"src/Saas.Api.Tests/Saas.Api.Tests.csproj\" contains \"Testcontainer" +
                         "s.PostgreSql\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 5
-    await testRunner.AndAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"pgvector/pgvec" +
-                        "tor:pg17\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 6
+    await testRunner.AndAsync("the infra test sources contain \"pgvector/pgvector:pg17\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 2: logins are created by the init script")]
-        public async global::System.Threading.Tasks.Task Criterion2LoginsAreCreatedByTheInitScript()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 2: logins are created by running 00-init.sh")]
+        public async global::System.Threading.Tasks.Task Criterion2LoginsAreCreatedByRunning00_Init_Sh()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "1";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 2: logins are created by the init script", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 2: logins are created by running 00-init.sh", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 7
+#line 8
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -160,10 +159,10 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 8
-    await testRunner.ThenAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"00-init.sh\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
 #line 9
+    await testRunner.ThenAsync("the infra test sources contain \"00-init.sh\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 10
     await testRunner.AndAsync("the infra test sources do not contain \"CREATE ROLE\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -180,7 +179,7 @@ namespace Saas.Api.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 3: tests no longer depend on the compose stack", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 11
+#line 12
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -190,10 +189,10 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 12
+#line 13
     await testRunner.ThenAsync("the infra test sources do not contain \"localhost:5001\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 13
+#line 14
     await testRunner.AndAsync("the infra test sources do not contain \"localhost:5002\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -201,16 +200,16 @@ namespace Saas.Api.Tests.Features
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 4: hosts are in-process in Development")]
-        public async global::System.Threading.Tasks.Task Criterion4HostsAreIn_ProcessInDevelopment()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 4: hosts run in-process with WebApplicationFactory")]
+        public async global::System.Threading.Tasks.Task Criterion4HostsRunIn_ProcessWithWebApplicationFactory()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 4: hosts are in-process in Development", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 4: hosts run in-process with WebApplicationFactory", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 15
+#line 16
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -220,11 +219,11 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 16
+#line 17
     await testRunner.ThenAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"WebApplication" +
                         "Factory\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 17
+#line 18
     await testRunner.AndAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"Development\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -241,7 +240,7 @@ namespace Saas.Api.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 5: host configuration", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 19
+#line 20
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -251,13 +250,13 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 20
+#line 21
     await testRunner.ThenAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"saas_owner\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 21
+#line 22
     await testRunner.AndAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"saas_app\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 22
+#line 23
     await testRunner.AndAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"Platform:Admin" +
                         "istratorEmail\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
@@ -266,16 +265,16 @@ namespace Saas.Api.Tests.Features
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 6: both hosts are started so hosted services run")]
-        public async global::System.Threading.Tasks.Task Criterion6BothHostsAreStartedSoHostedServicesRun()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 6: hosted services are not disabled")]
+        public async global::System.Threading.Tasks.Task Criterion6HostedServicesAreNotDisabled()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "5";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 6: both hosts are started so hosted services run", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 6: hosted services are not disabled", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 24
+#line 25
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -285,13 +284,13 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 25
-    await testRunner.ThenAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"WebApplication" +
-                        "Factory<ApiEntryPoint>\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
 #line 26
-    await testRunner.AndAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"WebApplication" +
-                        "Factory<AuthEntryPoint>\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"WebApplication" +
+                        "Factory\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 27
+    await testRunner.AndAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" does not contain \"Remove" +
+                        "All<IHostedService>\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -307,7 +306,7 @@ namespace Saas.Api.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 7: drivers use the in-process hosts and TestSettings", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 28
+#line 29
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -317,15 +316,15 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 29
+#line 30
     await testRunner.ThenAsync("the infra file \"src/Saas.Api.Tests/Drivers/ApiDriver.cs\" does not contain \"localh" +
                         "ost:5002\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 30
+#line 31
     await testRunner.AndAsync("the infra file \"src/Saas.Api.Tests/Drivers/AuthDriver.cs\" does not contain \"local" +
                         "host:5001\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 31
+#line 32
     await testRunner.AndAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestSettings.cs\" contains \"saas_ai\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -342,7 +341,7 @@ namespace Saas.Api.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 8: row-level security uses real Postgres", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 33
+#line 34
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -352,30 +351,30 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 34
+#line 35
     await testRunner.ThenAsync("the infra test sources do not contain \"UseInMemoryDatabase\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 35
+#line 36
     await testRunner.AndAsync("the infra test sources do not contain \"UseSqlite\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 36
-    await testRunner.AndAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"saas_app\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 37
+    await testRunner.AndAsync("the infra test sources contain \"saas_app\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 9: tokens resolve against the in-process identity host")]
-        public async global::System.Threading.Tasks.Task Criterion9TokensResolveAgainstTheIn_ProcessIdentityHost()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 9: tokens are validated against the in-process identity host")]
+        public async global::System.Threading.Tasks.Task Criterion9TokensAreValidatedAgainstTheIn_ProcessIdentityHost()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "8";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 9: tokens resolve against the in-process identity host", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 9: tokens are validated against the in-process identity host", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 38
+#line 39
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -385,10 +384,10 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 39
+#line 40
     await testRunner.ThenAsync("the infra test sources do not contain \"localhost:5001\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 40
+#line 41
     await testRunner.AndAsync("the infra test sources do not contain \"localhost:5002\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -407,7 +406,7 @@ namespace Saas.Api.Tests.Features
                     "d", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 42
+#line 43
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -417,13 +416,16 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 43
+#line 44
     await testRunner.ThenAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"WebApplication" +
                         "Factory<ApiEntryPoint>\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 44
+#line 45
     await testRunner.AndAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestHosts.cs\" contains \"WebApplication" +
                         "Factory<AuthEntryPoint>\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 46
+    await testRunner.AndAsync("the infra test sources do not contain \"saas-ai:\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -439,7 +441,7 @@ namespace Saas.Api.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 11: CI needs only Docker", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 46
+#line 48
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -449,7 +451,7 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 47
+#line 49
     await testRunner.ThenAsync("the infra file \".github/workflows/ci.yml\" does not contain \"docker compose up\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
@@ -457,16 +459,16 @@ namespace Saas.Api.Tests.Features
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("criterion 12: remarks describe Testcontainers and in-process hosts")]
-        public async global::System.Threading.Tasks.Task Criterion12RemarksDescribeTestcontainersAndIn_ProcessHosts()
+        [global::NUnit.Framework.DescriptionAttribute("criterion 12: documentation describes Testcontainers and in-process hosts")]
+        public async global::System.Threading.Tasks.Task Criterion12DocumentationDescribesTestcontainersAndIn_ProcessHosts()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "11";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 12: remarks describe Testcontainers and in-process hosts", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("criterion 12: documentation describes Testcontainers and in-process hosts", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 49
+#line 51
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -476,14 +478,14 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 50
+#line 52
     await testRunner.ThenAsync("the infra file \"src/Saas.Api.Tests/Drivers/TestSettings.cs\" contains \"Testcontain" +
                         "ers\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 51
+#line 53
     await testRunner.AndAsync("the infra file \"CLAUDE.md\" contains \"Testcontainers\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 52
+#line 54
     await testRunner.AndAsync("the infra file \"CLAUDE.md\" contains \"Docker\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }

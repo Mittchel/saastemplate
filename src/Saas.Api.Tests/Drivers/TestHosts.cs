@@ -45,9 +45,11 @@ public static class TestHosts
     public static string OwnerConnectionString { get; private set; } = string.Empty;
     public static string AiConnectionString { get; private set; } = string.Empty;
 
+    /// <remarks>Each client is owned by its caller; the factory itself is disposed in <see cref="StopAsync"/>.</remarks>
     public static HttpClient CreateApiClient() =>
         (_api ?? throw new InvalidOperationException("Test hosts are not started.")).CreateClient();
 
+    /// <remarks>Each client is owned by its caller; the factory itself is disposed in <see cref="StopAsync"/>.</remarks>
     public static HttpClient CreateAuthClient() =>
         (_auth ?? throw new InvalidOperationException("Test hosts are not started.")).CreateClient();
 
@@ -79,7 +81,15 @@ public static class TestHosts
         }
         catch
         {
-            await StopAsync();
+            try
+            {
+                await StopAsync();
+            }
+            catch
+            {
+                // Cleanup is best effort; the startup failure is the error to surface.
+            }
+
             throw;
         }
     }
@@ -202,5 +212,15 @@ public static class TestHosts
             HttpRequestMessage request,
             CancellationToken cancellationToken) =>
             _invoker.Value.SendAsync(request, cancellationToken);
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && _invoker.IsValueCreated)
+            {
+                _invoker.Value.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
     }
 }
