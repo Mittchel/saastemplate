@@ -11,27 +11,25 @@ namespace Saas.Data.Models.Constants;
 /// </remarks>
 public static class OrganizationRolePermissions
 {
+    private static readonly string[] HrAdmin =
+    [
+        Permissions.OrganizationRead, Permissions.OrganizationWrite, Permissions.OrganizationDelete,
+        Permissions.MemberRead, Permissions.MemberInvite, Permissions.MemberWrite, Permissions.MemberRemove,
+        Permissions.UserRead, Permissions.RunCreate, Permissions.RunRead,
+        Permissions.TeamRead, Permissions.TeamWrite,
+        Permissions.EmployeeRead, Permissions.EmployeeWrite, Permissions.EmployeeImport,
+        Permissions.InvitationManage, Permissions.OrgChartRead, Permissions.ProfileOwn,
+    ];
+
     public static IReadOnlyList<string> For(OrganizationRole role) => role switch
     {
-        OrganizationRole.Owner =>
-        [
-            Permissions.OrganizationRead, Permissions.OrganizationWrite, Permissions.OrganizationDelete,
-            Permissions.MemberRead, Permissions.MemberInvite, Permissions.MemberWrite, Permissions.MemberRemove,
-            Permissions.RunCreate, Permissions.RunRead,
-            Permissions.UserRead,
-        ],
-        OrganizationRole.Admin =>
-        [
-            Permissions.OrganizationRead, Permissions.OrganizationWrite,
-            Permissions.MemberRead, Permissions.MemberInvite, Permissions.MemberWrite, Permissions.MemberRemove,
-            Permissions.RunCreate, Permissions.RunRead,
-            Permissions.UserRead,
-        ],
+        // Owner and Admin both become the HR admin role later.
+        OrganizationRole.Owner or OrganizationRole.Admin => HrAdmin,
         OrganizationRole.Member =>
         [
             Permissions.OrganizationRead,
-            Permissions.MemberRead,
             Permissions.RunCreate, Permissions.RunRead,
+            Permissions.TeamRead, Permissions.EmployeeRead, Permissions.ProfileOwn,
         ],
 
         // A stored value that is not a defined role grants nothing.

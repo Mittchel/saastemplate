@@ -17,6 +17,9 @@ public class ApiDriver
     public Task<HttpResponseMessage> PostAsync(string path, object body) =>
         _client.PostAsJsonAsync(path, body);
 
+    public Task<HttpResponseMessage> PutAsync(string path, object body) =>
+        _client.PutAsJsonAsync(path, body);
+
     public async Task<JsonDocument> GetJsonAsync(string path)
     {
         var response = await _client.GetAsync(path);

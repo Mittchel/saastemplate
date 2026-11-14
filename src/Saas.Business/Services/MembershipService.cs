@@ -14,15 +14,14 @@ namespace Saas.Business.Services;
 /// <inheritdoc />
 public class MembershipService(
     ApplicationDbContext context,
-    ITenantContext tenantContext,
-    IOrganizationService organizationService) : IMembershipService
+    ITenantContext tenantContext) : IMembershipService
 {
     /// <inheritdoc />
     public async Task<IReadOnlyList<MemberSummary>> ListAsync(
         Guid organizationId,
         CancellationToken cancellationToken = default)
     {
-        await RequireRoleAsync(organizationId, OrganizationRole.Member, cancellationToken);
+        ActiveOrganizationGuard.Require(tenantContext, organizationId);
 
         var members = await context.Memberships
             .AsNoTracking()
@@ -42,7 +41,7 @@ public class MembershipService(
         OrganizationRole role,
         CancellationToken cancellationToken = default)
     {
-        await RequireRoleAsync(organizationId, OrganizationRole.Admin, cancellationToken);
+        ActiveOrganizationGuard.Require(tenantContext, organizationId);
 
         var membership = await context.Memberships
             .Include(m => m.User)
@@ -69,7 +68,7 @@ public class MembershipService(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        await RequireRoleAsync(organizationId, OrganizationRole.Admin, cancellationToken);
+        ActiveOrganizationGuard.Require(tenantContext, organizationId);
         await RemoveInternalAsync(organizationId, userId, cancellationToken);
     }
 
@@ -131,22 +130,4 @@ public class MembershipService(
             "No authenticated user.",
             ErrorScenario.InvalidCredentials,
             HttpStatusCode.Unauthorized);
-
-    private async Task RequireRoleAsync(
-        Guid organizationId,
-        OrganizationRole minimumRole,
-        CancellationToken cancellationToken)
-    {
-        var role = await organizationService.GetRoleAsync(RequireUserId(), organizationId, cancellationToken)
-            ?? throw FunctionalException.Forbidden(
-                "You are not a member of this organization.",
-                ErrorScenario.NotAMember);
-
-        if (role < minimumRole)
-        {
-            throw FunctionalException.Forbidden(
-                $"This action requires the {minimumRole} role.",
-                ErrorScenario.InsufficientOrganizationRole);
-        }
-    }
 }

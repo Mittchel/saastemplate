@@ -27,3 +27,34 @@ Feature: Roles
         Then the response status is 200
         When I request the members of my organization
         Then the response status is 200
+
+    Scenario: Another organization's id answers 404 for its owner
+        Given I am signed in as the development user
+        When I request the members of another organization
+        Then the response status is 404
+        When I change a member's role to Member in another organization
+        Then the response status is 404
+
+    Scenario: A member cannot manage members or invitations
+        Given an ordinary account has been switched into the development user's organization
+        When I request the members of my organization
+        Then the response status is 403
+        When I change the account's role in my organization
+        Then the response status is 403
+        When I request the invitations of my organization
+        Then the response status is 403
+
+    Scenario: A promotion applies to the same token
+        Given an ordinary account has been switched into the development user's organization
+        And the development user is signed in as a second caller
+        When I request the members of my organization
+        Then the response status is 403
+        When the development user promotes the account to Admin
+        And I request the members of my organization
+        Then the response status is 200
+
+    Scenario: The development user carries the new permissions
+        Given I am signed in as the development user
+        Then my permissions include "invitation.manage"
+        And my permissions include "team.read"
+        And my permissions include "profile.own"

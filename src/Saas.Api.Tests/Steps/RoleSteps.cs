@@ -24,6 +24,9 @@ public class RoleSteps(
 {
     private Guid? _sharedOrganizationId;
     private Guid? _memberUserId;
+    private readonly ApiDriver _devApi = new();
+    private AuthDriver.TokenPair? _devTokens;
+    private Guid _devOrganizationId;
 
     [Given("an ordinary account has been switched into the development user's organization")]
     public async Task OrdinaryAccountSwitchedIn()
@@ -77,6 +80,85 @@ public class RoleSteps(
         var response = await api.GetAsync($"/organizations/{context.OrganizationId}/members");
 
         context.LastStatusCode = (int)response.StatusCode;
+    }
+
+    [Given("the development user is signed in as a second caller")]
+    public async Task DevelopmentUserSignedInAsSecondCaller()
+    {
+        _devTokens = (await auth.SignInAsync(settings.DevUserEmail, settings.DevUserPassword))
+            .ShouldNotBeNull("could not sign in as the development user");
+        _devApi.Authenticate(_devTokens.AccessToken);
+        _devOrganizationId = Guid.Parse(AuthDriver.ReadClaim(_devTokens.AccessToken, "org_id")!);
+    }
+
+    [When("I request the members of another organization")]
+    public async Task RequestMembersOfAnotherOrganization()
+    {
+        var foreignId = await ForeignOrganizationIdAsync();
+        var response = await api.GetAsync($"/organizations/{foreignId}/members");
+
+        context.LastStatusCode = (int)response.StatusCode;
+    }
+
+    [When("I change a member's role to Member in another organization")]
+    public async Task ChangeRoleInAnotherOrganization()
+    {
+        var foreignId = await ForeignOrganizationIdAsync();
+        var response = await api.PutAsync(
+            $"/organizations/{foreignId}/members/{Guid.NewGuid()}", new { role = "Member" });
+
+        context.LastStatusCode = (int)response.StatusCode;
+    }
+
+    [When("I change the account's role in my organization")]
+    public async Task ChangeAccountRole()
+    {
+        var response = await api.PutAsync(
+            $"/organizations/{context.OrganizationId}/members/{_memberUserId}", new { role = "Member" });
+
+        context.LastStatusCode = (int)response.StatusCode;
+    }
+
+    [When("I request the invitations of my organization")]
+    public async Task RequestInvitations()
+    {
+        var response = await api.GetAsync($"/organizations/{context.OrganizationId}/invitations");
+
+        context.LastStatusCode = (int)response.StatusCode;
+    }
+
+    [When("the development user promotes the account to Admin")]
+    public async Task DevelopmentUserPromotesAccount()
+    {
+        var response = await _devApi.PutAsync(
+            $"/organizations/{_devOrganizationId}/members/{_memberUserId}", new { role = "Admin" });
+
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+    }
+
+    [Then("my permissions include {string}")]
+    public async Task PermissionsInclude(string permission)
+    {
+        using var me = await api.GetJsonAsync("/me");
+        var permissions = me.RootElement.GetProperty("permissions")
+            .EnumerateArray().Select(e => e.GetString()).ToList();
+
+        permissions.ShouldContain(permission);
+    }
+
+    // The ordinary account's own personal organization stands in for "somebody else's".
+    private async Task<Guid> ForeignOrganizationIdAsync()
+    {
+        var tokens = (await auth.SignInAsync(settings.MemberUserEmail, settings.MemberUserPassword))
+            .ShouldNotBeNull("could not sign in as the ordinary account");
+        var memberApi = new ApiDriver();
+        memberApi.Authenticate(tokens.AccessToken);
+
+        using var organizations = await memberApi.GetJsonAsync("/organizations");
+
+        return organizations.RootElement.EnumerateArray()
+            .First(o => o.GetProperty("isPersonal").GetBoolean())
+            .GetProperty("id").GetGuid();
     }
 
     [AfterScenario]

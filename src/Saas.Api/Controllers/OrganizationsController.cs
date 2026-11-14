@@ -120,7 +120,7 @@ public class OrganizationsController(
     // --- Invitations -------------------------------------------------------
 
     [HttpGet("{organizationId:guid}/invitations")]
-    [Authorize(Policy = Permissions.MemberRead)]
+    [Authorize(Policy = Permissions.InvitationManage)]
     [ProducesResponseType<IReadOnlyList<InvitationSummary>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> ListInvitations(
         Guid organizationId,
@@ -132,7 +132,7 @@ public class OrganizationsController(
     /// build the link; wire an email sender here for production.
     /// </summary>
     [HttpPost("{organizationId:guid}/invitations")]
-    [Authorize(Policy = Permissions.MemberInvite)]
+    [Authorize(Policy = Permissions.InvitationManage)]
     [ProducesResponseType<CreateInvitationResponse>(StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateInvitation(
         Guid organizationId,
@@ -149,7 +149,7 @@ public class OrganizationsController(
     }
 
     [HttpDelete("{organizationId:guid}/invitations/{invitationId:guid}")]
-    [Authorize(Policy = Permissions.MemberInvite)]
+    [Authorize(Policy = Permissions.InvitationManage)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> RevokeInvitation(
         Guid organizationId,
