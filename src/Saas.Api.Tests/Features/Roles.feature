@@ -35,8 +35,16 @@ Feature: Roles
         Given the development user is signed in as a second caller
         When I request the members of another organization
         Then the response status is 404
+        And the error names "Organization"
         When I change a member's role to Member in another organization
         Then the response status is 404
+        And the error names "Organization"
+
+    Scenario: Removing a member through another organization's id answers 404
+        Given the development user is signed in as a second caller
+        When I remove a member from another organization
+        Then the response status is 404
+        And the error names "Organization"
 
     Scenario: A member cannot manage members until promoted, and the promotion applies to the same token
         Given an ordinary account has been switched into the development user's organization

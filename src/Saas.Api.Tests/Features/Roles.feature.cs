@@ -110,7 +110,7 @@ namespace Saas.Api.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Roles.feature.ndjson", 7);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Roles.feature.ndjson", 8);
         }
         
         [global::NUnit.Framework.TestAttribute()]
@@ -281,10 +281,52 @@ namespace Saas.Api.Tests.Features
         await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 38
-        await testRunner.WhenAsync("I change a member\'s role to Member in another organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 39
+        await testRunner.WhenAsync("I change a member\'s role to Member in another organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 40
         await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 41
+        await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::NUnit.Framework.TestAttribute()]
+        [global::NUnit.Framework.DescriptionAttribute("Removing a member through another organization\'s id answers 404")]
+        public async global::System.Threading.Tasks.Task RemovingAMemberThroughAnotherOrganizationsIdAnswers404()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "4";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Removing a member through another organization\'s id answers 404", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 43
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 44
+        await testRunner.GivenAsync("the development user is signed in as a second caller", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 45
+        await testRunner.WhenAsync("I remove a member from another organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 46
+        await testRunner.ThenAsync("the response status is 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 47
+        await testRunner.AndAsync("the error names \"Organization\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -297,12 +339,12 @@ namespace Saas.Api.Tests.Features
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "4";
+            string pickleIndex = "5";
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A member cannot manage members until promoted, and the promotion applies to the s" +
                     "ame token", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 41
+#line 49
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -312,37 +354,37 @@ namespace Saas.Api.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 42
+#line 50
         await testRunner.GivenAsync("an ordinary account has been switched into the development user\'s organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 43
+#line 51
         await testRunner.AndAsync("the development user is signed in as a second caller", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 44
+#line 52
         await testRunner.WhenAsync("I request the members of my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 45
+#line 53
         await testRunner.ThenAsync("the response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 46
+#line 54
         await testRunner.WhenAsync("I change the account\'s role in my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 47
+#line 55
         await testRunner.ThenAsync("the response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 48
+#line 56
         await testRunner.WhenAsync("I request the invitations of my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 49
+#line 57
         await testRunner.ThenAsync("the response status is 403", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 50
+#line 58
         await testRunner.WhenAsync("the development user promotes the account to Admin", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 51
+#line 59
         await testRunner.AndAsync("I request the members of my organization", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 52
+#line 60
         await testRunner.ThenAsync("the response status is 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }

@@ -32,6 +32,7 @@ public class RoleSteps(
     private Guid _devOrganizationId;
     private AuthDriver.TokenPair? _memberPersonalTokens;
     private Guid? _foreignOrganizationId;
+    private string _lastBody = string.Empty;
 
     [Given("an ordinary account has been switched into the development user's organization")]
     public async Task OrdinaryAccountSwitchedIn()
@@ -108,6 +109,7 @@ public class RoleSteps(
         var response = await _devApi.GetAsync($"/organizations/{foreignId}/members");
 
         context.LastStatusCode = (int)response.StatusCode;
+        _lastBody = await response.Content.ReadAsStringAsync();
     }
 
     [When("I change a member's role to Member in another organization")]
@@ -115,13 +117,38 @@ public class RoleSteps(
     {
         var foreignId = await ForeignOrganizationIdAsync();
         // The development user's own id: a real member of its organization, so only the
-        // organization check can produce the 404 (without it the call would reach the last-Owner rule).
+        // organization check can produce the 404 (without it the call would reach the
+        // member lookup in the wrong tenant and fail with a Membership 404 instead).
         var userId = AuthDriver.ReadClaim(_devTokens!.AccessToken, "sub");
         var response = await PutAsync(
             _devTokens!.AccessToken,
             $"/organizations/{foreignId}/members/{userId}", new { role = "Member" });
 
         context.LastStatusCode = (int)response.StatusCode;
+        _lastBody = await response.Content.ReadAsStringAsync();
+    }
+
+    [When("I remove a member from another organization")]
+    public async Task RemoveMemberFromAnotherOrganization()
+    {
+        var foreignId = await ForeignOrganizationIdAsync();
+        // The development user's own id, a real member of its organization, so only the
+        // organization check can produce the 404.
+        var userId = AuthDriver.ReadClaim(_devTokens!.AccessToken, "sub");
+        using var client = TestHosts.CreateApiClient();
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", _devTokens!.AccessToken);
+        var response = await client.DeleteAsync($"/organizations/{foreignId}/members/{userId}");
+
+        context.LastStatusCode = (int)response.StatusCode;
+        _lastBody = await response.Content.ReadAsStringAsync();
+    }
+
+    [Then("the error names {string}")]
+    public void ErrorNames(string what)
+    {
+        _lastBody.ShouldContain($"{what} was not found");
+        _lastBody.ShouldNotContain("Membership");
     }
 
     [When("I change the account's role in my organization")]
