@@ -54,6 +54,8 @@ jobs:
               -keypbe AES-256-CBC -certpbe AES-256-CBC -macalg sha256
             rm "certs/$name.key" "certs/$name.crt"
           done
+          # openssl writes the bundles readable by this user only; the containers run as another user.
+          chmod 644 certs/*.pfx
 
       - name: Start the stack
         run: docker compose up -d --build postgres auth api ai redis
@@ -95,7 +97,8 @@ jobs:
       - run: npm ci
 
       - name: Typecheck
-        run: npx tsc --noEmit
+        # Next.js 16 generates the route types (LayoutProps, PageProps) that tsc needs; build does it, tsc alone does not.
+        run: npx next typegen && npx tsc --noEmit
 
       - name: Lint
         run: npm run lint
