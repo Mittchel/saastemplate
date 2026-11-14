@@ -27,6 +27,8 @@ public class RoleSteps(
     private Guid? _memberUserId;
     private AuthDriver.TokenPair? _devTokens;
     private Guid _devOrganizationId;
+    private AuthDriver.TokenPair? _memberPersonalTokens;
+    private Guid? _foreignOrganizationId;
 
     [Given("an ordinary account has been switched into the development user's organization")]
     public async Task OrdinaryAccountSwitchedIn()
@@ -38,6 +40,11 @@ public class RoleSteps(
         var memberTokens = (await auth.SignInAsync(settings.MemberUserEmail, settings.MemberUserPassword))
             .ShouldNotBeNull("could not sign in as the ordinary account");
         var userId = Guid.Parse(AuthDriver.ReadClaim(memberTokens.AccessToken, "sub")!);
+
+        // Kept for the later steps: the identity service rate limits token requests, so a scenario signs in once per account.
+        _devTokens = devTokens;
+        _devOrganizationId = organizationId;
+        _memberPersonalTokens = memberTokens;
 
         // Recorded before the insert so the hook cleans up even if a later step fails.
         _sharedOrganizationId = organizationId;
@@ -85,7 +92,7 @@ public class RoleSteps(
     [Given("the development user is signed in as a second caller")]
     public async Task DevelopmentUserSignedInAsSecondCaller()
     {
-        _devTokens = (await auth.SignInAsync(settings.DevUserEmail, settings.DevUserPassword))
+        _devTokens ??= (await auth.SignInAsync(settings.DevUserEmail, settings.DevUserPassword))
             .ShouldNotBeNull("could not sign in as the development user");
         devApi.Authenticate(_devTokens.AccessToken);
         _devOrganizationId = Guid.Parse(AuthDriver.ReadClaim(_devTokens.AccessToken, "org_id")!);
@@ -151,17 +158,25 @@ public class RoleSteps(
     // The ordinary account's own personal organization stands in for "somebody else's".
     private async Task<Guid> ForeignOrganizationIdAsync()
     {
-        var tokens = (await auth.SignInAsync(settings.MemberUserEmail, settings.MemberUserPassword))
-            .ShouldNotBeNull("could not sign in as the ordinary account");
+        if (_foreignOrganizationId is { } known)
+        {
+            return known;
+        }
+
+        var tokens = _memberPersonalTokens
+            ?? (await auth.SignInAsync(settings.MemberUserEmail, settings.MemberUserPassword))
+                .ShouldNotBeNull("could not sign in as the ordinary account");
         // A caller of its own, so the scenario's shared driver keeps its account.
         var member = new ApiDriver();
         member.Authenticate(tokens.AccessToken);
 
         using var organizations = await member.GetJsonAsync("/organizations");
 
-        return organizations.RootElement.EnumerateArray()
+        _foreignOrganizationId = organizations.RootElement.EnumerateArray()
             .First(o => o.GetProperty("isPersonal").GetBoolean())
             .GetProperty("id").GetGuid();
+
+        return _foreignOrganizationId.Value;
     }
 
     [AfterScenario]

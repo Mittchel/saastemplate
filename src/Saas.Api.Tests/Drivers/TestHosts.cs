@@ -68,28 +68,7 @@ public static class TestHosts
 
     /// <remarks>Each client is owned by its caller; the factory itself is disposed in <see cref="StopAsync"/>.</remarks>
     public static HttpClient CreateAuthClient() =>
-        (_auth ?? throw new InvalidOperationException("Test hosts are not started."))
-            .CreateDefaultClient(new DistinctClientHandler());
-
-    /// <summary>
-    /// The identity service rate limits per client IP (60 token requests a minute), and every in-process
-    /// request has the same address. The suite runs in seconds, so it would exhaust that one bucket and get
-    /// 429 for sign-ins. The service trusts X-Forwarded-For, so each request claims its own address.
-    /// </summary>
-    private sealed class DistinctClientHandler : DelegatingHandler
-    {
-        private static int _next;
-
-        protected override Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request,
-            CancellationToken cancellationToken)
-        {
-            var n = Interlocked.Increment(ref _next);
-            request.Headers.Remove("X-Forwarded-For");
-            request.Headers.Add("X-Forwarded-For", $"10.{(n >> 16) & 255}.{(n >> 8) & 255}.{n & 255}");
-            return base.SendAsync(request, cancellationToken);
-        }
-    }
+        (_auth ?? throw new InvalidOperationException("Test hosts are not started.")).CreateClient();
 
     public static async Task StartAsync(string clientId, string clientSecret, string administratorEmail)
     {
@@ -292,28 +271,7 @@ public static class TestHosts
             builder.UseSetting("OpenIddict:Clients:0:ClientId", clientId);
             builder.UseSetting("OpenIddict:Clients:0:ClientSecret", clientSecret);
             builder.UseSetting("Platform:AdministratorEmail", administratorEmail);
-
-            // TestServer leaves RemoteIpAddress null, and the forwarded-headers middleware only trusts a
-            // known peer, so without this X-Forwarded-For is ignored and every sign-in shares the rate
-            // limiter's single "unknown" bucket. Loopback stands in for the proxy in front of the service.
-            builder.ConfigureServices(services =>
-                services.AddTransient<Microsoft.AspNetCore.Hosting.IStartupFilter, LoopbackPeerStartupFilter>());
         }
-    }
-
-    private sealed class LoopbackPeerStartupFilter : Microsoft.AspNetCore.Hosting.IStartupFilter
-    {
-        public Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> Configure(
-            Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> next) =>
-            app =>
-            {
-                app.Use(nextMiddleware => context =>
-                {
-                    context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
-                    return nextMiddleware(context);
-                });
-                next(app);
-            };
     }
 
     /// <summary>Forwards to the identity host's handler, resolved on first use.</summary>
