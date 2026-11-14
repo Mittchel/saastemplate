@@ -38,6 +38,7 @@ jobs:
           sed -i 's|^ConnectionStrings__DefaultConnection=.*|ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=saas;Username=saas_app;Password=ci_app|' .env
           sed -i 's|^AI_DATABASE_URL=.*|AI_DATABASE_URL=postgresql://saas_ai:ci_ai@postgres:5432/saas|' .env
           sed -i 's/^OIDC_CLIENT_SECRET=.*/OIDC_CLIENT_SECRET=ci_client/' .env
+          sed -i 's/^PLATFORM_ADMIN_EMAIL=.*/PLATFORM_ADMIN_EMAIL=dev@saas.local/' .env
           sed -i 's/^AUTH_SECRET=.*/AUTH_SECRET=ci_auth_secret_not_used_in_production/' .env
           sed -i 's/^OIDC_SIGNING_CERT_PASSWORD=.*/OIDC_SIGNING_CERT_PASSWORD=ci_cert/' .env
           sed -i 's/^OIDC_ENCRYPTION_CERT_PASSWORD=.*/OIDC_ENCRYPTION_CERT_PASSWORD=ci_cert/' .env
@@ -74,6 +75,11 @@ jobs:
 
       - name: Integration tests
         run: dotnet test src/Saas.Api.Tests --configuration Release --no-build
+        # integrationsettings.json holds the local development passwords; these are the ones set above.
+        env:
+          ClientSecret: ci_client
+          Postgres: Host=localhost;Port=15432;Database=saas;Username=saas_app;Password=ci_app
+          PostgresOwner: Host=localhost;Port=15432;Database=saas;Username=saas_owner;Password=ci_owner
 
       - name: Service logs on failure
         if: failure()
